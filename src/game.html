@@ -624,6 +624,7 @@ function ensureAudio() {
     AU.master = ctx.createGain(); AU.music = ctx.createGain(); AU.fx = ctx.createGain();
     const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4;
     AU.music.connect(comp); AU.fx.connect(comp); comp.connect(AU.master); AU.master.connect(ctx.destination);
+    AU.layer = ctx.createGain(); AU.layer.connect(AU.music);
     const buf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate), d = buf.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     AU.noise = buf; applyVolumes(true);
@@ -742,7 +743,7 @@ function snapToChord(d, sc, tones) {
   return d;
 }
 function lead(voice, f, t, dur, v) {
-  const bus = AU.music;
+  const bus = AU.layer;
   if (voice === "pluck") tone(f, t, Math.max(.12, dur * .9), { type: "square", vol: .05 * v, bus, filter: 2400, attack: .003 });
   else if (voice === "marimba") { tone(f, t, .28, { type: "triangle", vol: .13 * v, bus, attack: .002 }); tone(f * 4, t, .06, { vol: .02 * v, bus }); }
   else if (voice === "flute") tone(f, t, Math.max(.2, dur * 1.1), { vol: .09 * v, bus, attack: .05, vib: 5 });
@@ -750,7 +751,7 @@ function lead(voice, f, t, dur, v) {
 }
 function musicStep(k, t, len) {
   if (k === 0) musicBar();
-  const sec = AU.sec, c = AU.cur, bus = AU.music, key = AU.key, M = MOODS[AU.mood] || MOODS.lobby;
+  const sec = AU.sec, c = AU.cur, bus = AU.layer, key = AU.key, M = MOODS[AU.mood] || MOODS.lobby;
   const hum = () => .85 + Math.random() * .3;
   // Pad
   if (sec.pad && k === 0) QUAL[c.q].forEach(x => tone(mtof(key - 12 + c.cr + x), t, len * 8, { vol: .022, bus, attack: .35 }));
@@ -797,6 +798,25 @@ function musicSchedule() {
     const sw = k % 2 ? M.swing * len : 0;
     try { musicStep(k, AU.next + sw, len); } catch (e) {}
     AU.next += len; AU.step = (AU.step + 1) % 8;
+  }
+}
+/* Screen-change fades. Each mood plays through its own "layer" gain: on a mood change the old layer fades out
+   while a fresh one fades in (a true crossfade, so long notes from the old mood die away instead of cutting off).
+   Moving between screens that share a mood gives a short volume dip instead. */
+function musicTransition(mood) {
+  const ctx = AU.ctx;
+  if (!ctx || !AU.layer || !AU.playing || ctx.state !== "running") { if (mood !== AU.mood) { AU.mood = mood; AU.sec = null; AU.step = 0; } return; }
+  const t = ctx.currentTime;
+  if (mood !== AU.mood) {
+    const old = AU.layer;
+    old.gain.cancelScheduledValues(t); old.gain.setValueAtTime(old.gain.value, t); old.gain.linearRampToValueAtTime(0, t + .7);
+    setTimeout(() => { try { old.disconnect(); } catch (e) {} }, 1600);
+    const nl = ctx.createGain(); nl.connect(AU.music);
+    nl.gain.setValueAtTime(0, t); nl.gain.setValueAtTime(0, t + .3); nl.gain.linearRampToValueAtTime(1, t + 1.6);
+    AU.layer = nl; AU.mood = mood; AU.sec = null; AU.step = 0; AU.next = Math.max(AU.next, t + .3);
+  } else {
+    const g = AU.layer.gain;
+    g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(.45, t + .18); g.linearRampToValueAtTime(1, t + .9);
   }
 }
 function musicStart() {
@@ -1333,7 +1353,8 @@ function render() {
   const views = { guide: guideView, settings: settingsView, setup: setupView, pass: passView, discuss: discussView, vote: voteView, result: resultView };
   app.innerHTML = (views[S.screen] || setupView)();
   if (S.screen === "pass") bindCard();
-  AU.mood = { pass: "hush", discuss: "tense", vote: "suspense" }[S.screen] || "lobby";
+  const viewKey = [S.screen, S.sub, S.gtopic, S.screen === "pass" ? S.idx : ""].join("|");
+  if (viewKey !== AU.view) { if (AU.view !== undefined) musicTransition({ pass: "hush", discuss: "tense", vote: "suspense" }[S.screen] || "lobby"); else AU.mood = { pass: "hush", discuss: "tense", vote: "suspense" }[S.screen] || "lobby"; AU.view = viewKey; }
   save();
 }
 
