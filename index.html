@@ -622,7 +622,7 @@ function applyScores() {
 }
 
 /* ---------- Audio: everything is synthesized live with Web Audio (no sound files) ---------- */
-const AU = { ctx: null, master: null, music: null, fx: null, noise: null, playing: false, step: 0, next: 0, timer: null, intensity: 0 };
+const AU = { ctx: null, master: null, music: null, fx: null, noise: null, playing: false, step: 0, next: 0, timer: null, mood: "lobby", sec: null, cur: null, key: 0, deg: 4, bar: 0 };
 const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
 function ensureAudio() {
   if (AU.ctx) return AU.ctx;
@@ -690,35 +690,128 @@ function sfx(name, delay = 0) {
   try { SFX[name](ctx.currentTime + .01 + delay); } catch (e) {}
 }
 
-/* Background music: an original sneaky "tiptoe" loop in D minor. 4 phrases x 32 eighth notes. */
-const BASS = [38,0,38,0,41,0,45,0, 43,0,43,0,46,0,50,0, 45,0,45,0,48,0,52,0, 45,0,43,0,41,0,40,0];
-const LEAD_A = [62,0,65,0,69,0,68,69, 0,0,67,0,65,0,0,0, 64,0,67,0,72,0,71,72, 0,0,69,0,0,0,0,0];
-const LEAD_B = [74,0,72,0,70,0,69,0, 67,0,0,70,69,0,67,0, 69,0,0,0,64,0,65,0, 67,0,0,0,69,0,0,0];
-function musicStep(i, t, len) {
-  const k = i % 32, phrase = Math.floor(i / 32) % 4, tense = AU.intensity > 0, bus = AU.music;
-  const b = BASS[k];
-  if (b) tone(mtof(b), t, len * .85, { type: "triangle", vol: .32, bus, filter: 900, attack: .004 });
-  const lead = (phrase % 2 ? LEAD_B : LEAD_A)[k];
-  if (lead && phrase !== 0) tone(mtof(lead + (phrase === 3 ? 12 : 0)), t, len * 1.5, { type: "square", vol: .05, bus, filter: tense ? 3200 : 2000, attack: .003 });
-  if (lead && phrase === 0 && k % 4 === 0) tone(mtof(lead), t, len * 3, { type: "sine", vol: .06, bus });
-  hiss(t, .03, { vol: k % 2 ? .035 : .018, freq: 8000, bus });
-  if (k % 8 === 0) tone(mtof(b ? b + 24 : 62), t, len * 6, { type: "sine", vol: .03, bus });
-  if (tense) {
-    if (k % 4 === 0) tone(110, t, .16, { vol: .45, slideTo: 42, bus });
-    if (k % 4 === 2) hiss(t, .06, { vol: .08, type: "bandpass", freq: 2200, q: .7, bus });
-    if (k % 2 === 1) hiss(t, .04, { vol: .05, freq: 9000, bus });
+/* Background music: composed on the fly so it never loops the same way twice.
+   Sections pick a chord progression, bass style, drum style and lead instrument; the melody grows from a short
+   motif that mutates bar by bar; the key shifts now and then; and the mood follows the game screen. */
+const SCALE_MIN = [0, 2, 3, 5, 7, 8, 10], SCALE_HAR = [0, 2, 3, 5, 7, 8, 11];
+const QUAL = { m: [0, 3, 7], M: [0, 4, 7], d: [0, 3, 6] };
+const PROGS = [
+  [[0, "m"], [8, "M"], [3, "M"], [10, "M"]],   // i  VI  III VII
+  [[0, "m"], [5, "m"], [7, "M"], [0, "m"]],    // i  iv  V   i
+  [[0, "m"], [10, "M"], [8, "M"], [7, "M"]],   // i  VII VI  V  (descending)
+  [[0, "m"], [2, "d"], [7, "M"], [0, "m"]],    // i  ii° V   i
+  [[5, "m"], [0, "m"], [8, "M"], [7, "M"]],    // iv i   VI  V
+  [[0, "m"], [3, "M"], [5, "m"], [8, "M"]],    // i  III iv  VI
+  [[0, "m"], [0, "m"], [8, "M"], [7, "M"]],    // i  i   VI  V
+  [[8, "M"], [10, "M"], [0, "m"], [0, "m"]]    // VI VII i   i
+];
+const RHYTHMS = [[1,0,1,0,1,0,0,0],[1,0,0,1,0,0,1,0],[1,1,0,1,0,1,0,0],[0,0,1,0,1,1,1,0],[1,0,0,0,1,0,1,1],[1,0,1,1,0,0,1,0],[1,0,0,0,0,0,1,0],[0,1,0,1,0,1,0,1],[1,0,1,0,0,1,1,0]];
+const KEYS = [62, 64, 60, 57, 59, 65, 63];
+const MOODS = {
+  lobby:    { bpm: 104, swing: .12, bass: ["sneak", "walk", "walk", "pulse", "sparse"], drum: ["shaker", "tiptoe", "tiptoe", "groove"], lead: ["pluck", "marimba", "flute", "whistle", "marimba"], density: .75, pad: .4 },
+  hush:     { bpm: 90,  swing: .1,  bass: ["sparse", "sneak"], drum: ["shaker", "none", "tiptoe"], lead: ["flute", "marimba", "whistle"], density: .45, pad: .7 },
+  tense:    { bpm: 128, swing: 0,   bass: ["pulse", "octave", "walk", "octave"], drum: ["groove", "groove", "tiptoe"], lead: ["pluck", "marimba", "pluck"], density: .85, pad: .25 },
+  suspense: { bpm: 84,  swing: 0,   bass: ["sparse"], drum: ["heart"], lead: ["flute", "whistle"], density: .25, pad: .9 }
+};
+const pickR = a => a[Math.floor(Math.random() * a.length)];
+const degSemi = (d, sc) => 12 * Math.floor(d / 7) + sc[((d % 7) + 7) % 7];
+function makeMotif() { return { rhythm: pickR(RHYTHMS).slice(), steps: Array.from({ length: 8 }, () => pickR([-2, -1, -1, 1, 1, 2, 0, 3, -3])) }; }
+function newSection() {
+  const M = MOODS[AU.mood] || MOODS.lobby;
+  AU.secCount = (AU.secCount || 0) + 1;
+  if (!AU.key || (AU.secCount > 2 && Math.random() < .3)) AU.key = pickR(KEYS);
+  const brk = AU.mood !== "suspense" && AU.secCount > 2 && Math.random() < .15;
+  AU.sec = { mood: AU.mood, prog: pickR(PROGS), bars: pickR([4, 8, 8, 8]),
+    bass: brk ? "sparse" : pickR(M.bass), drum: brk ? "shaker" : pickR(M.drum), lead: pickR(M.lead),
+    density: brk ? 0 : M.density, pad: brk || Math.random() < M.pad, oct: pickR([0, 0, 0, 12, -12]), motif: makeMotif() };
+  if (AU.key + AU.sec.oct > 72) AU.sec.oct -= 12;
+  if (AU.key + AU.sec.oct < 55) AU.sec.oct += 12;
+  AU.bar = 0; AU.deg = AU.deg ?? 4;
+}
+function mutateMotif(m) {
+  const r = Math.random();
+  if (r < .35) m.steps[Math.floor(Math.random() * 8)] = pickR([-2, -1, 1, 2, 3, -3, 0]);
+  else if (r < .55) { const i = Math.floor(Math.random() * 8); m.rhythm[i] = m.rhythm[i] ? 0 : 1; }
+  else if (r < .65) m.steps = m.steps.map(x => -x);            // invert the contour
+  else if (r < .72) { m.rhythm.push(m.rhythm.shift()); }        // shift the rhythm
+}
+function musicBar() {
+  if (!AU.sec || AU.sec.mood !== AU.mood || AU.bar >= AU.sec.bars) newSection();
+  const sec = AU.sec, [cr, q] = sec.prog[AU.bar % sec.prog.length];
+  if (AU.bar % 4 === 0 && AU.bar) mutateMotif(sec.motif);
+  if (Math.random() < .3) mutateMotif(sec.motif);
+  const answer = AU.bar % 4 === 3;                               // phrase ends rest on a long chord tone
+  AU.cur = { cr, q, answer, last: AU.bar === sec.bars - 1, sc: q === "M" && cr === 7 ? SCALE_HAR : SCALE_MIN,
+    tones: QUAL[q].map(x => (cr + x) % 12), rhythm: answer ? [1, 0, 1, 0, 1, 0, 0, 0] : sec.motif.rhythm };
+  AU.bar++;
+}
+function snapToChord(d, sc, tones) {
+  for (const o of [0, 1, -1, 2, -2]) if (tones.includes(((degSemi(d + o, sc) % 12) + 12) % 12)) return d + o;
+  return d;
+}
+function lead(voice, f, t, dur, v) {
+  const bus = AU.music;
+  if (voice === "pluck") tone(f, t, Math.max(.12, dur * .9), { type: "square", vol: .05 * v, bus, filter: 2400, attack: .003 });
+  else if (voice === "marimba") { tone(f, t, .28, { type: "triangle", vol: .13 * v, bus, attack: .002 }); tone(f * 4, t, .06, { vol: .02 * v, bus }); }
+  else if (voice === "flute") tone(f, t, Math.max(.2, dur * 1.1), { vol: .09 * v, bus, attack: .05, vib: 5 });
+  else tone(f * 2, t, Math.max(.15, dur), { vol: .045 * v, bus, attack: .02, vib: 6 });
+}
+function musicStep(k, t, len) {
+  if (k === 0) musicBar();
+  const sec = AU.sec, c = AU.cur, bus = AU.music, key = AU.key, M = MOODS[AU.mood] || MOODS.lobby;
+  const hum = () => .85 + Math.random() * .3;
+  // Pad
+  if (sec.pad && k === 0) QUAL[c.q].forEach(x => tone(mtof(key - 12 + c.cr + x), t, len * 8, { vol: .022, bus, attack: .35 }));
+  // Bass
+  let root = key - 24 + c.cr; if (root > 47) root -= 12;
+  const next = sec.prog[AU.bar % sec.prog.length][0], nroot = key - 24 + next;
+  const B = (m, l, v = .3) => tone(mtof(m), t, l, { type: "triangle", vol: v * hum(), bus, filter: 900, attack: .004 });
+  switch (sec.bass) {
+    case "sneak": if (k === 0 || k === 3) B(root, len * .5); if (k === 6) B(root + 7, len * .5); break;
+    case "walk": if (k % 2 === 0) B([root, root + QUAL[c.q][1], root + 7, (nroot > 47 ? nroot - 12 : nroot) + pickR([-1, 1, 2])][k / 2], len * 1.6, .28); break;
+    case "pulse": B(root, len * .45, k % 2 ? .18 : .28); break;
+    case "octave": B(k % 2 ? root + 12 : root, len * .5, .26); break;
+    default: if (k === 0) { B(root, len * 7, .3); tone(mtof(root), t, len * 7, { vol: .12, bus }); } if (k === 4 && AU.mood !== "suspense") B(root + 7, len * 3, .18);
+  }
+  // Drums
+  const shaker = () => hiss(t, .03, { vol: (k % 2 ? .035 : .018) * hum(), freq: 8000, bus });
+  const snare = (v = .12) => { hiss(t, .1, { vol: v, type: "bandpass", freq: 1900, q: .7, bus }); tone(210, t, .06, { vol: v * .6, bus }); };
+  const kick = (v = .45) => tone(115, t, .16, { vol: v, slideTo: 42, bus });
+  switch (sec.drum) {
+    case "shaker": shaker(); break;
+    case "tiptoe": shaker(); if (k === 2 || k === 6) { tone(1700, t, .02, { type: "square", vol: .035, bus, filter: 4200 }); hiss(t, .03, { vol: .05, type: "bandpass", freq: 2200, bus }); } break;
+    case "groove": hiss(t, .04, { vol: k % 2 ? .05 : .025, freq: 9000, bus }); if (k === 0 || k === 4 || (k === 5 && Math.random() < .3)) kick(); if (k === 2 || k === 6) snare(); break;
+    case "heart": if (k === 0) kick(.5); if (k === 1) kick(.3); break;
+  }
+  if (c.last && sec.drum !== "none" && sec.drum !== "heart" && k >= 6) { snare(.08); hiss(t + len / 2, .08, { vol: .1, type: "bandpass", freq: 1900, bus }); }
+  // Lead melody
+  if (sec.density && c.rhythm[k] && Math.random() < sec.density + .2) {
+    let d = AU.deg + (c.answer ? -1 : sec.motif.steps[k]);
+    if (d > 11) d -= 3; if (d < 0) d += 3;
+    if (k % 4 === 0 || c.answer) d = snapToChord(d, c.sc, c.tones);
+    AU.deg = d;
+    let gap = 1; while (gap < 4 && k + gap < 8 && !c.rhythm[k + gap]) gap++;
+    lead(sec.lead, mtof(key + sec.oct + degSemi(d, c.sc)), t, len * gap * (c.answer && k === 4 ? 2.5 : 1), hum());
+    if (sec.lead === "marimba" && Math.random() < .4) lead("marimba", mtof(key + sec.oct + degSemi(d, c.sc) + 12), t + len * 3, len, .35);
   }
 }
 function musicSchedule() {
   const ctx = AU.ctx; if (!ctx || !AU.playing) return;
-  const len = 60 / (AU.intensity ? 128 : 108) / 2;
-  while (AU.next < ctx.currentTime + .15) { try { musicStep(AU.step, AU.next, len); } catch (e) {} AU.next += len; AU.step = (AU.step + 1) % 128; }
+  const M = MOODS[AU.mood] || MOODS.lobby;
+  const len = 60 / (M.bpm * (1 + (AU.drift || 0))) / 2;
+  while (AU.next < ctx.currentTime + .15) {
+    const k = AU.step % 8;
+    if (k === 0) AU.drift = (Math.random() - .5) * .04;        // tiny tempo breathing between bars
+    const sw = k % 2 ? M.swing * len : 0;
+    try { musicStep(k, AU.next + sw, len); } catch (e) {}
+    AU.next += len; AU.step = (AU.step + 1) % 8;
+  }
 }
 function musicStart() {
   if (!S.music || S.mute || AU.playing) return;
   const ctx = ensureAudio(); if (!ctx) return;
   if (ctx.state === "suspended") ctx.resume();
-  AU.playing = true; AU.next = ctx.currentTime + .1; AU.timer = setInterval(musicSchedule, 30);
+  AU.playing = true; AU.step = 0; AU.sec = null; AU.next = ctx.currentTime + .1; AU.timer = setInterval(musicSchedule, 30);
 }
 function musicStop() { AU.playing = false; clearInterval(AU.timer); AU.timer = null; }
 try { window.__imposterAudioStop && window.__imposterAudioStop(); } catch (e) {}
@@ -830,7 +923,7 @@ function settingsView() {
     <textarea id="custom" placeholder="Grandma's lasagna, Grandpa's meatloaf">${esc(S.custom)}</textarea>`;
   if (sub === "sound") body = `
     <div class="switch-row">
-      <div><b>${icon("music", 16)} Background music</b><p class="small muted">A sneaky loop that speeds up during clue time.</p></div>
+      <div><b>${icon("music", 16)} Background music</b><p class="small muted">Composed as you play, so it rarely repeats. It changes mood with the game.</p></div>
       <button class="switch" data-act="music" aria-pressed="${S.music}" aria-label="Background music"></button>
     </div>
     <label class="slider" for="musicVol"><span>Music volume</span><input type="range" id="musicVol" min="0" max="100" step="5" value="${S.musicVol}" ${S.music ? "" : "disabled"}><output>${S.musicVol}%</output></label>
@@ -1104,7 +1197,7 @@ function guideAllHTML() {
       <h4>Discussion timer</h4>
       <p>On the Timer screen, choose Off, 2, 3 or 5 minutes. On supported phones it also vibrates when time runs out.</p>
       <h4>Sound (Sound tile)</h4>
-      <p>Turn the background music and sound effects on or off separately, and set each volume. The speaker button at the top of every screen mutes everything at once. The music speeds up and adds a heartbeat drum during clue time.</p>
+      <p>Turn the background music and sound effects on or off separately, and set each volume. The speaker button at the top of every screen mutes everything at once. The music is composed as you play, so it rarely repeats. It changes mood with the game: relaxed on the home screen, hushed while cards are passed, fast and tense during clue time, and a slow heartbeat while you vote.</p>
       <h4>Saving</h4>
       <p>Players, settings and scores are saved in this browser on this device. They aren't shared with other phones.</p>
     </section>
@@ -1248,7 +1341,7 @@ function render() {
   const views = { guide: guideView, settings: settingsView, setup: setupView, pass: passView, discuss: discussView, vote: voteView, result: resultView };
   app.innerHTML = (views[S.screen] || setupView)();
   if (S.screen === "pass") bindCard();
-  AU.intensity = S.screen === "discuss" ? 1 : 0;
+  AU.mood = { pass: "hush", discuss: "tense", vote: "suspense" }[S.screen] || "lobby";
   save();
 }
 
