@@ -10,7 +10,8 @@ A pass-and-play party word game for 3–20 players on one phone. Everyone gets a
 - **Secret twists:** Undercover, Split Room, The Jester, Accomplice and Detective.
 - **House rule cards** that change how clues are given each round.
 - **Starting player** is never an imposter and can skip a word they don't like before anyone else sees it.
-- **Scoring** across rounds, a discussion timer, 8 word categories (~96 word/decoy pairs), and custom words.
+- **870 word pairs in 31 categories**, from Food, Animals and Countries to Superpowers, History and Weird. Every word has a close decoy (Pancake / Waffle) for the Undercover and Split Room twists. Add your own words too.
+- **Scoring** across rounds and a discussion timer.
 - **Built-in user guide** with one screen per topic.
 - Settings and scores are saved in the browser's local storage.
 
