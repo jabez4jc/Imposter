@@ -1,0 +1,1067 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Imposter Party</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: one narrow phone-first column, a "stage" that swaps screens; pass-and-play on one device. Deliberately single dark look (late-night party stage). */
+:root {
+  --stage: #1a0f2e;
+  --panel: #251a40;
+  --panel-2: #2f2350;
+  --line: #45386d;
+  --paper: #f6f0ff;
+  --muted: #b2a6d4;
+  --gold: #ffcf33;
+  --coral: #ff5c7a;
+  --mint: #4fe3b5;
+  --sky: #6fb6ff;
+  --on-gold: #241400;
+  --f-display: "Bowlby One", "Arial Black", Impact, sans-serif;
+  --f-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  background: var(--stage);
+  background-image: radial-gradient(1200px 500px at 50% -200px, #3a2266 0%, transparent 70%);
+  color: var(--paper);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.5;
+}
+.wrap {
+  max-width: 560px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 48px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+header.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+header.top .hdr-right { margin-left: auto; }
+.logo { font-family: var(--f-display); font-size: clamp(20px, 6.2vw, 26px); white-space: nowrap; letter-spacing: .5px; line-height: 1; margin: 0; }
+.logo span { color: var(--gold); }
+.round-tag { font-family: var(--f-mono); font-size: 12px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+h2 { font-family: var(--f-display); font-weight: 400; font-size: 22px; margin: 0; text-wrap: balance; line-height: 1.15; }
+h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin: 0; font-family: var(--f-mono); font-weight: 700; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+.section { display: flex; flex-direction: column; gap: 10px; }
+.box { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; }
+.btn {
+  border: 0; border-radius: 12px; padding: 14px 18px; font-weight: 800; font-size: 16px;
+  background: var(--gold); color: var(--on-gold); box-shadow: 0 4px 0 #b88f00;
+  transition: transform .08s ease, box-shadow .08s ease;
+}
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #b88f00; }
+.btn.big { font-family: var(--f-display); font-weight: 400; font-size: 20px; padding: 16px 20px; width: 100%; letter-spacing: .5px; }
+.btn.ghost { background: transparent; color: var(--paper); border: 1px solid var(--line); box-shadow: none; }
+.btn.ghost:active { transform: translateY(1px); }
+.btn.danger { background: var(--coral); color: #2a0010; box-shadow: 0 4px 0 #a92a45; }
+.btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.row > .grow { flex: 1 1 160px; min-width: 0; }
+
+input[type=text], textarea {
+  width: 100%; background: var(--stage); color: var(--paper); border: 1px solid var(--line);
+  border-radius: 10px; padding: 12px; font: inherit;
+}
+textarea { min-height: 84px; resize: vertical; font-family: var(--f-mono); font-size: 13px; }
+
+.players { display: flex; flex-wrap: wrap; gap: 8px; }
+.pchip { display: inline-flex; align-items: center; gap: 6px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; padding: 6px 6px 6px 14px; font-weight: 600; }
+.pchip button { border: 0; background: var(--line); width: 26px; height: 26px; border-radius: 50%; line-height: 1; font-size: 15px; color: var(--paper); }
+
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: var(--stage); padding: 5px; border-radius: 12px; border: 1px solid var(--line); }
+.seg button { border: 0; background: transparent; border-radius: 8px; padding: 10px 6px; font-weight: 800; font-size: 14px; color: var(--muted); }
+.seg button[aria-pressed=true] { background: var(--gold); color: var(--on-gold); }
+.mode-note { font-size: 14px; color: var(--muted); min-height: 3em; }
+
+.stepper { display: flex; align-items: center; gap: 14px; }
+.stepper button { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel-2); font-size: 22px; font-weight: 800; }
+.stepper output { font-family: var(--f-display); font-size: 34px; min-width: 1.6ch; text-align: center; color: var(--gold); line-height: 1; }
+
+.cats { display: flex; flex-wrap: wrap; gap: 8px; }
+.tog { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 8px 14px; font-weight: 600; font-size: 14px; color: var(--muted); }
+.tog[aria-pressed=true] { background: var(--panel-2); color: var(--paper); border-color: var(--mint); box-shadow: inset 0 0 0 1px var(--mint); }
+
+.twists { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.twist { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; align-items: start; text-align: left; border: 1px solid var(--line); background: var(--stage); border-radius: 12px; padding: 12px; }
+.twist .tick { grid-row: span 2; width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--line); margin-top: 2px; display: grid; place-items: center; font-size: 14px; font-weight: 800; }
+.twist[aria-pressed=true] .tick { background: var(--mint); border-color: var(--mint); color: var(--stage); }
+.twist b { font-size: 15px; }
+.twist span.d { font-size: 13px; color: var(--muted); }
+.switch-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.switch { flex: none; width: 52px; height: 30px; border-radius: 999px; border: 1px solid var(--line); background: var(--stage); position: relative; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--muted); transition: left .15s ease, background .15s; }
+.switch[aria-pressed=true] { background: var(--mint); border-color: var(--mint); }
+.switch[aria-pressed=true]::after { left: 25px; background: var(--stage); }
+
+.scores { display: flex; flex-direction: column; gap: 6px; }
+.score { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--line); font-variant-numeric: tabular-nums; }
+.score:last-child { border-bottom: 0; }
+.score .pts { font-family: var(--f-mono); font-weight: 700; color: var(--gold); }
+.score .delta { font-family: var(--f-mono); font-size: 13px; color: var(--mint); margin-left: 6px; }
+
+/* Pass & reveal */
+.pass { text-align: center; display: flex; flex-direction: column; gap: 18px; align-items: center; padding-top: 16px; }
+.pass .who { font-family: var(--f-display); font-size: clamp(34px, 10vw, 54px); line-height: 1.05; color: var(--gold); word-break: break-word; }
+.progress { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+.progress i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.progress i.done { background: var(--mint); }
+.progress i.now { background: var(--gold); }
+.card {
+  width: 100%; max-width: 380px; aspect-ratio: 3 / 4; border-radius: 22px; position: relative;
+  user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none;
+  border: 2px solid var(--line); overflow: hidden;
+}
+.card .face { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 22px; text-align: center; }
+.card .cover {
+  background:
+    repeating-linear-gradient(45deg, transparent 0 14px, rgba(255,207,51,.07) 14px 28px),
+    var(--panel);
+  transition: opacity .12s ease;
+}
+.card .cover .q { font-family: var(--f-display); font-size: 92px; line-height: 1; color: var(--gold); }
+.card .inner { background: var(--panel-2); opacity: 0; transition: opacity .12s ease; }
+.card.peek .inner { opacity: 1; }
+.card.peek .cover { opacity: 0; }
+.inner .label { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.inner .word { font-family: var(--f-display); font-size: clamp(30px, 9vw, 46px); line-height: 1.05; word-break: break-word; }
+.inner.imp { background: #3d1430; }
+.inner.imp .word { color: var(--coral); }
+.inner.special .word { color: var(--sky); }
+.inner .note { font-size: 15px; color: var(--paper); max-width: 30ch; }
+.inner .rolepill { font-family: var(--f-mono); font-weight: 700; font-size: 12px; padding: 4px 10px; border-radius: 999px; background: var(--stage); border: 1px solid currentColor; letter-spacing: .1em; }
+
+/* Discuss */
+.timer { font-family: var(--f-display); font-size: clamp(64px, 22vw, 110px); line-height: 1; text-align: center; font-variant-numeric: tabular-nums; }
+.timer.low { color: var(--coral); }
+.rulecard { background: var(--gold); color: var(--on-gold); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 4px; transform: rotate(-1.2deg); }
+.rulecard h3 { color: var(--on-gold); opacity: .75; }
+.rulecard p { font-weight: 800; font-size: 18px; line-height: 1.3; }
+.callout { border-left: 4px solid var(--sky); padding: 4px 0 4px 12px; font-size: 15px; }
+
+/* Vote */
+.vote-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.vote-grid button { border: 2px solid var(--line); background: var(--panel); border-radius: 12px; padding: 14px 10px; font-weight: 800; font-size: 16px; word-break: break-word; }
+.vote-grid button[aria-pressed=true] { border-color: var(--coral); background: #3d1430; color: var(--coral); }
+
+/* Results */
+.verdict { font-family: var(--f-display); font-size: clamp(30px, 9vw, 44px); line-height: 1.05; text-align: center; text-wrap: balance; }
+.verdict.win { color: var(--mint); } .verdict.lose { color: var(--coral); } .verdict.jest { color: var(--sky); }
+.reveal-word { text-align: center; display: flex; flex-direction: column; gap: 4px; }
+.reveal-word .w { font-family: var(--f-display); font-size: 28px; }
+.roles { display: flex; flex-direction: column; gap: 6px; }
+.rrow { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 10px 12px; border-radius: 10px; background: var(--stage); border: 1px solid var(--line); }
+.rrow .nm { font-weight: 800; min-width: 0; word-break: break-word; }
+.rrow .nm small { display: block; font-weight: 400; color: var(--muted); font-size: 13px; }
+.tag { font-family: var(--f-mono); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: .08em; text-transform: uppercase; border: 1px solid currentColor; white-space: nowrap; }
+.tag.crew { color: var(--mint); } .tag.imp { color: var(--coral); } .tag.special { color: var(--sky); }
+.accused-mark { color: var(--gold); font-family: var(--f-mono); font-size: 12px; }
+.steal { border: 1px dashed var(--coral); background: transparent; color: var(--coral); border-radius: 8px; padding: 6px 10px; font-size: 13px; font-weight: 700; margin-top: 6px; }
+.steal[aria-pressed=true] { background: var(--coral); color: #2a0010; border-style: solid; }
+
+.fade-in { animation: fin .25s ease both; }
+@keyframes fin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.shake { animation: shake .5s ease; }
+@keyframes shake { 20%,60% { transform: translateX(-6px) } 40%,80% { transform: translateX(6px) } }
+@media (prefers-reduced-motion: reduce) { .fade-in, .shake { animation: none; } .btn, .card .inner, .card .cover { transition: none; } }
+/* Home tiles & sub-screens */
+.home, .sub { display: flex; flex-direction: column; gap: 16px; }
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.tile { position: relative; text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 28px 12px 14px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.tile:active { background: var(--panel-2); }
+.tile.warn { border-color: var(--coral); }
+.tile .tl { font-family: var(--f-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.tile .tv { font-family: var(--f-display); font-size: 26px; line-height: 1.15; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile .tn { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chev { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 22px; color: var(--muted); }
+.back { align-self: flex-start; border: 0; background: transparent; color: var(--gold); font-weight: 800; font-size: 16px; padding: 6px 0; }
+.plist { display: flex; flex-direction: column; gap: 6px; }
+.prow { display: grid; grid-template-columns: 26px 1fr auto auto; gap: 8px; align-items: center; background: var(--stage); border: 1px solid var(--line); border-radius: 10px; padding: 6px 6px 6px 10px; }
+.prow .num { font-family: var(--f-mono); color: var(--muted); font-size: 13px; }
+.prow .pn { font-weight: 700; min-width: 0; overflow-wrap: anywhere; }
+.mini { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); font-size: 16px; font-weight: 800; }
+.mini:disabled { opacity: .3; cursor: default; }
+.linkish { align-self: flex-start; border: 0; background: transparent; color: var(--sky); font-weight: 700; padding: 4px 0; }
+.gmenu { display: flex; flex-direction: column; gap: 8px; }
+.gmenu button { position: relative; display: grid; grid-template-columns: 32px 1fr; gap: 10px; align-items: center; text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 34px 12px 12px; }
+.gmenu .gnum { width: 28px; height: 28px; border-radius: 50%; background: var(--stage); border: 1px solid var(--line); display: grid; place-items: center; font-family: var(--f-mono); font-size: 12px; color: var(--gold); }
+.gmenu .gt { display: flex; flex-direction: column; min-width: 0; }
+.gmenu .gt span { font-size: 13px; color: var(--muted); }
+.pager { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pager .btn { font-size: 14px; padding: 12px; min-width: 0; overflow-wrap: anywhere; }
+/* Guide */
+.hdr-right { flex: none; white-space: nowrap; display: flex; align-items: center; gap: 10px; }
+.helpbtn { white-space: nowrap; flex: none; border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 6px 12px; font-weight: 800; font-size: 13px; color: var(--paper); }
+.guide { display: flex; flex-direction: column; gap: 18px; }
+.guide .lede { font-size: 17px; }
+.toc { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.toc button { text-align: left; border: 1px solid var(--line); background: var(--stage); border-radius: 10px; padding: 10px 12px; font-size: 14px; font-weight: 600; }
+.gsec { scroll-margin-top: calc(16px + env(safe-area-inset-top, 0px)); }
+.gsec h2 { font-size: 20px; }
+.gsec h4 { margin: 4px 0 0; font-size: 16px; }
+.gsec p, .gsec li { font-size: 15px; max-width: 65ch; }
+.gsec ol, .gsec ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+.gsec code { font-family: var(--f-mono); font-size: 13px; background: var(--stage); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
+.def { display: grid; grid-template-columns: auto 1fr; gap: 10px 12px; align-items: start; }
+.def .tag { margin-top: 3px; justify-self: start; }
+.pts-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.pts-table th, .pts-table td { text-align: left; padding: 8px 6px; border-bottom: 1px dashed var(--line); vertical-align: top; }
+.pts-table th { font-family: var(--f-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.pts-table td:last-child { font-family: var(--f-mono); font-weight: 700; color: var(--gold); white-space: nowrap; text-align: right; }
+.example { background: var(--stage); border: 1px dashed var(--line); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+.example b { color: var(--gold); }
+@media (max-width: 380px) { .toc { grid-template-columns: 1fr; } }
+.rules-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
+details summary { cursor: pointer; font-weight: 800; }
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script>
+(function () {
+'use strict';
+
+/* ---------- Word bank: [secret word, close decoy] ---------- */
+const BANK = {
+  Food: [["Pizza","Calzone"],["Sushi","Ramen"],["Pancake","Waffle"],["Taco","Burrito"],["Popcorn","Nachos"],["Croissant","Bagel"],["Ice cream","Frozen yogurt"],["Lasagna","Spaghetti"],["Dumpling","Spring roll"],["Cheesecake","Brownie"],["Curry","Stew"],["Avocado","Mango"]],
+  Places: [["Airport","Train station"],["Hospital","Pharmacy"],["Beach","Lake"],["Library","Bookstore"],["Casino","Arcade"],["Zoo","Aquarium"],["Gym","Spa"],["Cinema","Theater"],["Museum","Art gallery"],["Castle","Palace"],["Submarine","Cruise ship"],["Space station","Rocket"]],
+  Animals: [["Penguin","Puffin"],["Giraffe","Camel"],["Octopus","Squid"],["Shark","Dolphin"],["Kangaroo","Rabbit"],["Owl","Bat"],["Elephant","Rhino"],["Sloth","Koala"],["Flamingo","Swan"],["Bee","Wasp"],["Crocodile","Lizard"],["Panda","Polar bear"]],
+  Jobs: [["Pilot","Astronaut"],["Chef","Baker"],["Dentist","Doctor"],["Firefighter","Lifeguard"],["Magician","Clown"],["Detective","Spy"],["Teacher","Librarian"],["Plumber","Electrician"],["DJ","Drummer"],["Farmer","Gardener"],["Barber","Tattoo artist"],["Judge","Lawyer"]],
+  Things: [["Umbrella","Raincoat"],["Toothbrush","Comb"],["Candle","Lamp"],["Mirror","Window"],["Backpack","Suitcase"],["Ladder","Stairs"],["Pillow","Blanket"],["Scissors","Knife"],["Headphones","Speaker"],["Keyboard","Piano"],["Wallet","Purse"],["Microwave","Oven"]],
+  Activities: [["Karaoke","Dancing"],["Camping","Picnic"],["Bowling","Golf"],["Skydiving","Bungee jump"],["Surfing","Skateboarding"],["Yoga","Stretching"],["Chess","Checkers"],["Fishing","Sailing"],["Wedding","Birthday party"],["Job interview","First date"],["Road trip","Cruise"],["Sleepover","House party"]],
+  Weird: [["Haunted toaster","Cursed fridge"],["Alien tourist","Time traveler"],["Pirate","Viking"],["Vampire","Werewolf"],["Robot butler","Smart speaker"],["Zombie","Mummy"],["Wizard","Witch"],["Ninja","Samurai"],["Dragon","Dinosaur"],["Unicorn","Pegasus"],["Mermaid","Siren"],["Ghost","Shadow"]],
+  Tech: [["Wi-Fi","Bluetooth"],["Selfie","Group photo"],["Password","PIN code"],["Emoji","Sticker"],["Podcast","Radio"],["Drone","Helicopter"],["Smartwatch","Fitness band"],["Video call","Voice note"],["Charger","Power bank"],["Robot vacuum","Lawn mower"],["Hashtag","Meme"],["Laptop","Tablet"]]
+};
+
+const TWISTS = {
+  undercover: { name: "Undercover", d: "Imposters get a close decoy word and don't know they're the imposter." },
+  split:      { name: "Split Room", d: "Zero imposters. Half the room gets one word, half gets a decoy. Chaos." },
+  jester:     { name: "The Jester", d: "Someone knows the word but wins big if they get voted out." },
+  accomplice: { name: "Accomplice", d: "A word-holder secretly knows who the imposter is and protects them." },
+  detective:  { name: "Detective", d: "One player is told the name of someone who is definitely not an imposter." }
+};
+
+const RULES = [
+  "Clues must be exactly three words.",
+  "Speak only in questions.",
+  "Give your clue as a sound effect.",
+  "Every clue must rhyme with the previous one.",
+  "No nouns allowed.",
+  "Point at something in the room as your clue.",
+  "Lightning round: you get 5 seconds per clue.",
+  "Say your clue in a dramatic movie-trailer voice.",
+  "Your clue must start with the same letter as your name.",
+  "Act your clue out. No talking.",
+  "Reverse order: the last player goes first.",
+  "Every clue must be a lie about how you feel about the word."
+];
+
+const MODES = {
+  classic: { name: "Classic", note: "Exactly the number you set. Set it to 0 for a bluffing round where nobody is the imposter." },
+  maybe:   { name: "Maybe", note: "Your number, but each round has a 1-in-4 chance of no imposter at all. Nobody is told." },
+  mystery: { name: "Mystery", note: "Anything goes: zero imposters, a few, or everyone. Nobody knows the count, not even the imposters." }
+};
+
+/* ---------- State ---------- */
+const DEFAULTS = {
+  players: ["Ava","Ben","Chloe","Dev","Eli"],
+  cats: ["Food","Places","Animals","Things","Weird"],
+  custom: "",
+  mode: "classic",
+  count: 1,
+  hint: true,
+  twistOn: true,
+  twists: { undercover: true, split: true, jester: true, accomplice: true, detective: true },
+  rules: true,
+  timer: 180,
+  scores: {},
+  roundNo: 0,
+  round: null,
+  screen: "setup",
+  idx: 0,
+  peeked: false
+};
+const KEY = "imposter-party-v1";
+let S;
+function load(seed) {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
+  S = Object.assign({}, DEFAULTS, saved || {}, seed || {});
+  S.twists = Object.assign({}, DEFAULTS.twists, S.twists || {});
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+/* ---------- Helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const rnd = n => Math.floor(Math.random() * n);
+const pick = a => a[rnd(a.length)];
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const app = $("#app");
+
+function customPairs() {
+  return S.custom.split("\n").map(l => l.split(",").map(x => x.trim())).filter(p => p[0])
+    .map(p => [p[0], p[1] || p[0]]);
+}
+
+/* ---------- Round generation ---------- */
+function eligible(t, n, k) {
+  const crew = n - k;
+  switch (t) {
+    case "undercover": return k >= 1 && k < n;
+    case "split": return n >= 4;
+    case "jester": return n >= 4 && crew >= 3;
+    case "accomplice": return k >= 1 && crew >= 3;
+    case "detective": return n >= 4 && crew >= 3;
+  }
+  return false;
+}
+
+function wordPool() {
+  let pool = [];
+  S.cats.forEach(c => (BANK[c] || []).forEach(p => pool.push({ cat: c, w: p[0], d: p[1] })));
+  customPairs().forEach(p => pool.push({ cat: "Custom", w: p[0], d: p[1] }));
+  if (!pool.length) pool = BANK.Food.map(p => ({ cat: "Food", w: p[0], d: p[1] }));
+  return pool;
+}
+function drawPair(avoid) {
+  let pool = wordPool();
+  if (avoid && pool.length > 1) pool = pool.filter(p => !avoid.includes(p.w) && !avoid.includes(p.d));
+  if (!pool.length) pool = wordPool();
+  return pick(pool);
+}
+/* Starter-only: swap in a fresh word before anyone else has looked. Roles stay the same. */
+function skipWord() {
+  const R = S.round;
+  const pair = drawPair([R.word, R.decoy]);
+  const flip = Math.random() < .5;
+  const word = flip ? pair.d : pair.w, decoy = flip ? pair.w : pair.d;
+  R.roles.forEach(r => { if (r.word === R.word) r.word = word; else if (r.word === R.decoy) r.word = decoy; });
+  R.word = word; R.decoy = decoy; R.cat = pair.cat; R.skips = (R.skips || 0) + 1;
+}
+
+function newRound() {
+  const names = S.players.slice();
+  const n = names.length;
+  // Word
+  const pair = drawPair();
+  const flip = Math.random() < .5; // sometimes swap which side is "real"
+  const word = flip ? pair.d : pair.w, decoy = flip ? pair.w : pair.d;
+
+  // Imposter count
+  let k;
+  if (S.mode === "classic") k = Math.min(S.count, n - 1);
+  else if (S.mode === "maybe") k = Math.random() < .25 ? 0 : Math.min(S.count, n - 1);
+  else {
+    const r = Math.random();
+    if (r < .15) k = 0;
+    else if (r < .23) k = n;
+    else k = 1 + rnd(Math.max(1, Math.floor(n / 2)));
+  }
+
+  // Twist (one per round, sometimes)
+  let twist = null;
+  if (S.twistOn && Math.random() < .5) {
+    const opts = Object.keys(S.twists).filter(t => S.twists[t] && eligible(t, n, k));
+    if (opts.length) twist = pick(opts);
+  }
+  if (twist === "split") k = 0;
+
+  const order = shuffle([...Array(n).keys()]);
+  const roles = names.map(nm => ({ name: nm, role: "crew", word, note: "" }));
+  const imps = order.slice(0, k);
+  const rest = order.slice(k);
+  imps.forEach(i => {
+    roles[i].role = "imp";
+    roles[i].word = twist === "undercover" ? decoy : null;
+  });
+  if (twist === "split") {
+    shuffle([...Array(n).keys()]).slice(0, Math.floor(n / 2)).forEach(i => roles[i].word = decoy);
+  }
+  let restQ = shuffle(rest);
+  if (twist === "jester") roles[restQ.shift()].role = "jester";
+  if (twist === "accomplice") {
+    const a = restQ.shift(); roles[a].role = "acc";
+    roles[a].note = imps.map(i => names[i]).join(" & ");
+  }
+  if (twist === "detective") {
+    const d = restQ.shift(); roles[d].role = "det";
+    const clean = rest.filter(i => i !== d);
+    roles[d].note = names[pick(clean)];
+  }
+  if (S.mode !== "mystery" && k > 1 && twist !== "undercover") {
+    imps.forEach(i => roles[i].note = imps.filter(j => j !== i).map(j => names[j]).join(", "));
+  }
+
+  const starterIdx = (() => { const safe = [...Array(n).keys()].filter(i => roles[i].role !== "imp"); return safe.length ? pick(safe) : rnd(n); })();
+  S.roundNo += 1;
+  S.round = {
+    no: S.roundNo, cat: pair.cat, word, decoy, twist, roles,
+    starter: names[starterIdx],
+    order: [...Array(n).keys()].map(i => (starterIdx + i) % n), // starter looks first, then seating order
+    locked: false, skips: 0,
+    dir: Math.random() < .5 ? "clockwise" : "counter-clockwise",
+    rule: S.rules ? pick(RULES) : null,
+    accused: [], stolen: [], applied: false
+  };
+  S.idx = 0; S.peeked = false; S.screen = "pass";
+}
+
+/* ---------- Scoring ---------- */
+function computeScores(R) {
+  const delta = {}; R.roles.forEach(r => delta[r.name] = 0);
+  const impNames = R.roles.filter(r => r.role === "imp").map(r => r.name);
+  const acc = new Set(R.accused);
+  const jester = R.roles.find(r => r.role === "jester");
+  if (jester && acc.has(jester.name)) {
+    delta[jester.name] = 3;
+    return { delta, outcome: "jest" };
+  }
+  const exact = impNames.length === acc.size && impNames.every(n => acc.has(n));
+  const survivors = impNames.filter(n => !acc.has(n));
+  R.roles.forEach(r => {
+    if (r.role === "imp") {
+      if (!acc.has(r.name)) delta[r.name] += 2;
+      else if (R.stolen.includes(r.name)) delta[r.name] += 1;
+    } else if (r.role === "acc") {
+      if (survivors.length) delta[r.name] += 2;
+    } else if (exact) {
+      delta[r.name] += impNames.length === 0 ? 2 : 1;
+    }
+  });
+  return { delta, outcome: exact ? "win" : "lose", survivors, impNames };
+}
+function applyScores() {
+  const R = S.round;
+  if (!R || R.applied) return;
+  const { delta } = computeScores(R);
+  Object.keys(delta).forEach(n => S.scores[n] = (S.scores[n] || 0) + delta[n]);
+  R.applied = true;
+}
+
+/* ---------- Audio ---------- */
+let actx = null;
+function beep(freq = 660, dur = .18, times = 1) {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    for (let i = 0; i < times; i++) {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.frequency.value = freq; o.type = "square";
+      const t = actx.currentTime + i * (dur + .08);
+      g.gain.setValueAtTime(.08, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur);
+    }
+  } catch (e) {}
+}
+
+/* ---------- Screens ---------- */
+function header() {
+  const r = S.round && ["pass", "discuss", "vote", "result"].includes(S.screen) ? `Round ${S.round.no}` : "";
+  const btn = S.screen === "guide" ? "" : `<button class="helpbtn" data-act="guide" aria-label="Open the user guide">? Guide</button>`;
+  return `<header class="top"><h1 class="logo">IMPOSTER<span>.</span>PARTY</h1><div class="hdr-right">${S.screen === "guide" ? "" : r ? `<span class="round-tag">${r}</span>` : ""}${btn}</div></header>`;
+}
+
+const TIMERS = [[0,"Off"],[120,"2 min"],[180,"3 min"],[300,"5 min"]];
+const SUBS = {
+  players:   { title: "Players", act: "Who's playing? Add them in seating order." },
+  imposters: { title: "Imposters", act: "How many liars, and how sure can anyone be?" },
+  twists:    { title: "Twists & rules", act: "Secret surprises and silly clue rules." },
+  words:     { title: "Words", act: "Pick the categories the secret word comes from." },
+  timer:     { title: "Timer", act: "How long the group gets to give clues and argue." },
+  scores:    { title: "Scores", act: "Running totals across rounds." }
+};
+function sortedScores() { return Object.entries(S.scores).filter(([k]) => S.players.includes(k)).sort((a, b) => b[1] - a[1]); }
+function canDeal() { return S.players.length >= 3 && (S.cats.length || customPairs().length); }
+
+function setupView() {
+  const n = S.players.length;
+  if (S.count > Math.max(0, n - 1)) S.count = Math.max(0, n - 1);
+  const twCount = Object.values(S.twists).filter(Boolean).length;
+  const cust = customPairs().length;
+  const top = sortedScores()[0];
+  const tile = (sub, label, value, note, warn) => `
+    <button class="tile${warn ? " warn" : ""}" data-act="sub" data-v="${sub}">
+      <span class="tl">${label}</span><span class="tv">${value}</span><span class="tn">${note}</span><span class="chev" aria-hidden="true">›</span>
+    </button>`;
+  return `${header()}
+  <div class="home fade-in">
+    <div class="section">
+      <h2>One word. Some liars. Maybe.</h2>
+      <p class="muted small">Everyone gets the secret word except the imposters. There could be one, several, or none.</p>
+    </div>
+    <div class="tiles">
+      ${tile("players", "Players", n, n < 3 ? "Add at least 3" : esc(S.players.slice(0, 3).join(", ")) + (n > 3 ? "…" : ""), n < 3)}
+      ${tile("imposters", "Imposters", S.mode === "mystery" ? "?" : S.count, MODES[S.mode].name + " mode")}
+      ${tile("twists", "Twists", S.twistOn ? twCount + " on" : "Off", S.rules ? "Rule cards on" : "Rule cards off")}
+      ${tile("words", "Words", S.cats.length + (cust ? "+" : ""), S.cats.length || cust ? (S.cats.length + " categories" + (cust ? ", " + cust + " custom" : "")) : "Pick a category", !S.cats.length && !cust)}
+      ${tile("timer", "Timer", S.timer ? S.timer / 60 + " min" : "Off", "Clue discussion")}
+      ${tile("scores", "Scores", top ? esc(top[0]) : "–", top ? top[1] + " pts · leading" : "No rounds yet")}
+    </div>
+    <button class="btn big" data-act="start" ${canDeal() ? "" : "disabled"}>Deal the cards</button>
+    <button class="btn ghost" data-act="guide">New here? How to play</button>
+  </div>`;
+}
+
+function settingsView() {
+  const sub = SUBS[S.sub] ? S.sub : "players";
+  const n = S.players.length, maxK = Math.max(0, n - 1);
+  let body = "";
+  if (sub === "players") body = `
+    <form class="row" id="addForm">
+      <input class="grow" type="text" id="newName" placeholder="Add a player" maxlength="18" autocomplete="off" aria-label="Player name">
+      <button class="btn" type="submit">Add</button>
+    </form>
+    <div class="plist">${S.players.map((p, i) => `<div class="prow"><span class="num">${i + 1}</span><span class="pn">${esc(p)}</span>
+      <button class="mini" data-act="up" data-i="${i}" aria-label="Move ${esc(p)} up" ${i === 0 ? "disabled" : ""}>↑</button>
+      <button class="mini" data-act="rm" data-i="${i}" aria-label="Remove ${esc(p)}">×</button></div>`).join("")}</div>
+    <p class="small ${n < 3 ? "" : "muted"}" ${n < 3 ? 'style="color:var(--coral)"' : ""}>${n < 3 ? "You need at least 3 players." : n + " players · up to 20 · names must be different"}</p>`;
+  if (sub === "imposters") body = `
+    <div class="seg" role="group" aria-label="Imposter mode">
+      ${Object.keys(MODES).map(m => `<button data-act="mode" data-v="${m}" aria-pressed="${S.mode === m}">${MODES[m].name}</button>`).join("")}
+    </div>
+    <p class="mode-note">${MODES[S.mode].note}</p>
+    ${S.mode !== "mystery" ? `
+    <div class="row" style="justify-content:space-between">
+      <div><b>Imposters</b><p class="small muted">${S.count === 0 ? "No imposter. Everyone has the word." : S.count === 1 ? "Just one liar." : S.count + " liars who know each other."}</p></div>
+      <div class="stepper">
+        <button data-act="cnt" data-v="-1" aria-label="Fewer imposters" ${S.count <= 0 ? "disabled" : ""}>−</button>
+        <output aria-live="polite">${S.count}</output>
+        <button data-act="cnt" data-v="1" aria-label="More imposters" ${S.count >= maxK ? "disabled" : ""}>+</button>
+      </div>
+    </div>` : ""}
+    <div class="switch-row">
+      <div><b>Imposters see the category</b><p class="small muted">A small hint so they can bluff.</p></div>
+      <button class="switch" data-act="hint" aria-pressed="${S.hint}" aria-label="Imposters see the category"></button>
+    </div>`;
+  if (sub === "twists") body = `
+    <div class="switch-row">
+      <div><b>Secret twists</b><p class="small muted">About half the rounds use one of the twists you enable.</p></div>
+      <button class="switch" data-act="twistOn" aria-pressed="${S.twistOn}" aria-label="Enable twists"></button>
+    </div>
+    ${S.twistOn ? `<div class="twists">${Object.keys(TWISTS).map(t => `
+      <button class="twist" data-act="tw" data-v="${t}" aria-pressed="${!!S.twists[t]}">
+        <span class="tick">${S.twists[t] ? "✓" : ""}</span><b>${TWISTS[t].name}</b><span class="d">${TWISTS[t].d}</span>
+      </button>`).join("")}</div>` : ""}
+    <div class="switch-row">
+      <div><b>House rule cards</b><p class="small muted">A silly rule for how clues are given each round.</p></div>
+      <button class="switch" data-act="rules" aria-pressed="${S.rules}" aria-label="House rule cards"></button>
+    </div>`;
+  if (sub === "words") body = `
+    <div class="cats">${Object.keys(BANK).map(c => `<button class="tog" data-act="cat" data-v="${c}" aria-pressed="${S.cats.includes(c)}">${c}</button>`).join("")}</div>
+    <label for="custom"><b>Your own words</b></label>
+    <p class="small muted">One per line: <code>word, decoy</code>. The decoy is used by Undercover and Split Room.</p>
+    <textarea id="custom" placeholder="Grandma's lasagna, Grandpa's meatloaf">${esc(S.custom)}</textarea>`;
+  if (sub === "timer") body = `
+    <div class="seg" role="group" aria-label="Timer length" style="grid-template-columns:repeat(4,1fr)">
+      ${TIMERS.map(([v, l]) => `<button data-act="timer" data-v="${v}" aria-pressed="${S.timer === v}">${l}</button>`).join("")}
+    </div>
+    <p class="small muted">The timer beeps in the last 10 seconds and sounds an alarm at zero. You start it yourself on the clue screen.</p>`;
+  if (sub === "scores") {
+    const sc = sortedScores();
+    body = sc.length ? `<div class="scores">${sc.map(([k, v], i) => `<div class="score"><span>${esc(k)}${i === 0 ? ' <span class="tag special">Leader</span>' : ""}</span><span class="pts">${v}</span></div>`).join("")}</div>
+      <button class="btn ghost" data-act="reset">${resetArmed ? "Tap again to reset all scores" : "Reset scores"}</button>`
+      : `<p class="muted">No scores yet. Points appear here after your first round.</p>`;
+    body += `<button class="linkish" data-act="guide" data-v="g-score">How scoring works ›</button>`;
+  }
+  return `${header()}
+  <div class="sub fade-in">
+    <button class="back" data-act="home">‹ Home</button>
+    <div class="section"><h2>${SUBS[sub].title}</h2><p class="muted small">${SUBS[sub].act}</p></div>
+    <div class="box">${body}</div>
+    <button class="btn big" data-act="home">Done</button>
+  </div>`;
+}
+
+function roleCard(r) {
+  const R = S.round;
+  const hintLine = S.hint ? `<p class="note">Category: <b>${esc(R.cat)}</b></p>` : "";
+  if (r.role === "imp" && r.word === null) {
+    return `<div class="face inner imp">
+      <span class="rolepill" style="color:var(--coral)">IMPOSTER</span>
+      <div class="word">You're the imposter</div>
+      ${hintLine}
+      ${r.note ? `<p class="note">Your partners: <b>${esc(r.note)}</b></p>` : ""}
+      <p class="note muted">Blend in. Listen to the clues and fake it.</p>
+    </div>`;
+  }
+  let extra = "", pill = "", cls = "";
+  if (r.role === "jester") { pill = "JESTER"; cls = "special"; extra = `<p class="note">Act suspicious on purpose. If the group votes you out, you win the round.</p>`; }
+  if (r.role === "acc") { pill = "ACCOMPLICE"; cls = "special"; extra = `<p class="note">The imposter is <b>${esc(r.note)}</b>. Steer suspicion away from them.</p>`; }
+  if (r.role === "det") { pill = "DETECTIVE"; cls = "special"; extra = `<p class="note"><b>${esc(r.note)}</b> is definitely not an imposter.</p>`; }
+  return `<div class="face inner ${cls}">
+    ${pill ? `<span class="rolepill" style="color:var(--sky)">${pill}</span>` : `<span class="label">Your secret word</span>`}
+    <div class="word">${esc(r.word)}</div>
+    ${pill ? `<p class="note muted">Word above. Keep it secret.</p>` : ""}
+    ${extra}
+  </div>`;
+}
+
+function passView() {
+  const R = S.round, r = R.roles[R.order ? R.order[S.idx] : S.idx];
+  const canSkip = S.idx === 0 && !R.locked && r.name === R.starter && r.word;
+  const dots = R.roles.map((_, i) => `<i class="${i < S.idx ? "done" : i === S.idx ? "now" : ""}"></i>`).join("");
+  return `${header()}
+  <div class="pass fade-in">
+    <div class="progress" aria-label="Player ${S.idx + 1} of ${R.roles.length}">${dots}</div>
+    <p class="muted">Pass the phone to</p>
+    <div class="who">${esc(r.name)}</div>
+    <div class="card" id="card" role="button" tabindex="0" aria-label="Press and hold to see your card">
+      <div class="face cover"><div class="q">?</div><p><b>Press and hold</b> to peek</p><p class="small muted">Only ${esc(r.name)} should look.</p></div>
+      ${roleCard(r)}
+    </div>
+    ${canSkip ? `<p class="small muted" style="max-width:34ch">You give the first clue, so you're not an imposter. Don't like this word? Swap it before anyone else sees it.</p>
+    <button class="btn ghost" data-act="skip" ${S.peeked ? "" : "disabled"}>Skip this word${R.skips ? ` (skipped ${R.skips})` : ""}</button>` : ""}
+    <button class="btn big" data-act="next" ${S.peeked ? "" : "disabled"}>${S.idx + 1 < R.roles.length ? "Got it · pass it on" : "Everyone's seen it"}</button>
+  </div>`;
+}
+
+let timerLeft = 0, timerId = null, timerRunning = false;
+function fmt(s) { return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; }
+
+function discussView() {
+  const R = S.round;
+  const modeHint = S.mode === "classic"
+    ? (S.count === 0 ? "Rumour says there's no imposter this time. Or is there?" : `There ${S.count === 1 ? "is 1 imposter" : "are " + S.count + " imposters"}${S.twistOn ? ", unless a twist says otherwise" : ""}.`)
+    : S.mode === "maybe" ? `There ${S.count === 1 ? "should be 1 imposter" : "should be " + S.count + " imposters"}. There might be none.`
+    : "Could be zero imposters. Could be everyone. Nobody knows.";
+  return `${header()}
+  <div class="section fade-in">
+    <h2>Clue time</h2>
+    <div class="box" style="align-items:center;text-align:center;gap:6px;border-color:var(--gold)">
+      <span class="round-tag">First clue from</span>
+      <div class="who" style="font-family:var(--f-display);font-size:clamp(34px,10vw,54px);line-height:1.05;color:var(--gold);word-break:break-word">${esc(R.starter)}</div>
+      <p class="small muted">Then go ${R.dir === "clockwise" ? "clockwise ↻" : "counter-clockwise ↺"}. One clue each, two laps.</p>
+    </div>
+    <p class="callout">${modeHint}</p>
+  </div>
+  ${R.rule ? `<div class="rulecard"><h3>House rule</h3><p>${esc(R.rule)}</p></div>` : ""}
+  ${S.timer ? `<div class="box" style="align-items:center">
+    <div class="timer ${timerLeft <= 15 ? "low" : ""}" id="timer" aria-live="off">${fmt(timerLeft)}</div>
+    <div class="row" style="justify-content:center">
+      <button class="btn" data-act="tgl">${timerRunning ? "Pause" : timerLeft === S.timer ? "Start timer" : "Resume"}</button>
+      <button class="btn ghost" data-act="treset">Reset</button>
+    </div>
+  </div>` : ""}
+  <button class="btn big" data-act="tovote">Time to vote</button>
+  <button class="btn ghost" data-act="repeek">Someone forgot their card</button>`;
+}
+
+function voteView() {
+  const R = S.round, sel = new Set(R.accused);
+  const label = sel.size === 0 ? "There's no imposter" : sel.size === R.roles.length ? "Everyone's an imposter!" : `Accuse ${sel.size === 1 ? [...sel][0] : sel.size + " players"}`;
+  return `${header()}
+  <div class="section fade-in">
+    <h2>Who's lying?</h2>
+    <p class="muted">Agree as a group and tap everyone you accuse. Tap nobody if you think there's no imposter.</p>
+  </div>
+  <div class="vote-grid">${R.roles.map(r => `<button data-act="acc" data-v="${esc(r.name)}" aria-pressed="${sel.has(r.name)}">${esc(r.name)}</button>`).join("")}</div>
+  <div class="row">
+    <button class="btn ghost grow" data-act="accAll">Select everyone</button>
+    <button class="btn ghost grow" data-act="accNone">Clear</button>
+  </div>
+  <button class="btn big ${sel.size ? "danger" : ""}" data-act="verdict">${esc(label)}</button>`;
+}
+
+function resultView() {
+  const R = S.round;
+  const res = computeScores(R);
+  const imps = R.roles.filter(r => r.role === "imp");
+  const k = imps.length, n = R.roles.length;
+  let headline, cls = res.outcome;
+  if (res.outcome === "jest") headline = "The Jester fooled you all!";
+  else if (R.twist === "split") headline = res.outcome === "win" ? "You saw through the Split Room!" : "There was no imposter. The room was split.";
+  else if (k === 0) headline = res.outcome === "win" ? "Correct! There was no imposter." : "There was no imposter all along!";
+  else if (k === n) headline = res.outcome === "win" ? "You caught it: everyone was an imposter!" : "Everyone was an imposter!";
+  else headline = res.outcome === "win" ? `Crew wins! ${k === 1 ? "Imposter" : "Imposters"} caught.` : `${k === 1 ? "The imposter" : "The imposters"} got away!`;
+
+  const accSet = new Set(R.accused);
+  const caught = imps.filter(r => accSet.has(r.name) && r.word === null);
+  const roleLabel = r => r.role === "imp" ? ["Imposter", "imp"] : r.role === "jester" ? ["Jester", "special"] : r.role === "acc" ? ["Accomplice", "special"] : r.role === "det" ? ["Detective", "special"] : ["Crew", "crew"];
+  return `${header()}
+  <div class="section fade-in" style="gap:14px">
+    <div class="verdict ${cls}" id="verdict">${esc(headline)}</div>
+    <div class="reveal-word">
+      <span class="round-tag">${esc(R.cat)}${R.twist ? " · twist: " + TWISTS[R.twist].name : ""}</span>
+      <span class="w">${esc(R.word)}</span>
+      ${R.twist === "split" || R.twist === "undercover" ? `<span class="small muted">Decoy word: <b>${esc(R.decoy)}</b></span>` : ""}
+    </div>
+    ${R.twist ? `<p class="callout small">${esc(TWISTS[R.twist].d)}</p>` : ""}
+  </div>
+  <div class="box">
+    <h3>Who was who</h3>
+    <div class="roles">${R.roles.map(r => {
+      const [lab, c] = roleLabel(r);
+      const d = res.delta[r.name];
+      return `<div class="rrow"><div class="nm">${esc(r.name)} ${accSet.has(r.name) ? `<span class="accused-mark">· accused</span>` : ""}
+        <small>${r.word === null ? "No word" : "Had: " + esc(r.word)}</small>
+        ${caught.includes(r) ? `<button class="steal" data-act="steal" data-v="${esc(r.name)}" aria-pressed="${R.stolen.includes(r.name)}">${R.stolen.includes(r.name) ? "Guessed the word · +1" : "Last chance: guessed the word?"}</button>` : ""}
+      </div><div style="text-align:right"><span class="tag ${c}">${lab}</span><div class="pts" style="font-family:var(--f-mono);color:${d ? "var(--gold)" : "var(--muted)"};margin-top:4px">${d ? "+" + d : "0"}</div></div></div>`;
+    }).join("")}</div>
+  </div>
+  <button class="btn big" data-act="again">Next round</button>
+  <button class="btn ghost" data-act="tosetup">Home · settings &amp; scores</button>`;
+}
+
+
+const GUIDE_TOC = [
+  ["g-quick", "Quick start", "Play your first round in a minute"],
+  ["g-flow", "A round, step by step", "Deal, pass, clues, vote, results"],
+  ["g-setup", "Setting up", "Players, words, timer and saving"],
+  ["g-modes", "Imposter modes", "Classic, Maybe and Mystery"],
+  ["g-roles", "Roles", "Crew, Imposter, Jester and more"],
+  ["g-twists", "Twists", "The five secret twists"],
+  ["g-rules", "House rule cards", "Silly rules for giving clues"],
+  ["g-skip", "Skipping the word", "Swap a word you don't like"],
+  ["g-vote", "Voting", "Accuse, clear, or blame everyone"],
+  ["g-score", "Scoring", "Who gets points and when"],
+  ["g-tips", "Tips & strategy", "Play better on either side"],
+  ["g-faq", "FAQ & troubleshooting", "Common questions and fixes"]
+];
+let guideCache = null;
+function guideSection(id) {
+  if (!guideCache) { const t = document.createElement("template"); t.innerHTML = guideAllHTML(); guideCache = t.content; }
+  const el = guideCache.getElementById ? guideCache.getElementById(id) : guideCache.querySelector("#" + id);
+  return el ? el.innerHTML : "";
+}
+function guideBackLabel() {
+  return { setup: "Close guide", settings: "Close guide", pass: "Back to the cards", discuss: "Back to clue time", vote: "Back to voting", result: "Back to results" }[S.back] || "Close guide";
+}
+function guideView() {
+  const id = S.gtopic;
+  const i = GUIDE_TOC.findIndex(t => t[0] === id);
+  if (i < 0) return `${header()}
+  <div class="sub fade-in">
+    <button class="back" data-act="unguide">‹ ${guideBackLabel()}</button>
+    <div class="section"><h2>How to play</h2>
+      <p class="muted small">A party game for 3 to 20 players on one phone. Everyone gets a secret word except the imposters, who bluff. You never know for sure how many imposters there are. There might be none.</p></div>
+    <nav class="gmenu" aria-label="Guide topics">${GUIDE_TOC.map(([gid, t, d], k) => `
+      <button data-act="topic" data-v="${gid}"><span class="gnum">${k + 1}</span><span class="gt"><b>${t}</b><span>${d}</span></span><span class="chev" aria-hidden="true">›</span></button>`).join("")}</nav>
+  </div>`;
+  const prev = GUIDE_TOC[i - 1], next = GUIDE_TOC[i + 1];
+  return `${header()}
+  <div class="sub fade-in">
+    <div class="row" style="justify-content:space-between">
+      <button class="back" data-act="topic" data-v="">‹ All topics</button>
+      <span class="round-tag">${i + 1} / ${GUIDE_TOC.length}</span>
+    </div>
+    <section class="box gsec">${guideSection(id)}</section>
+    <div class="pager">
+      ${prev ? `<button class="btn ghost" data-act="topic" data-v="${prev[0]}">‹ ${prev[1]}</button>` : `<span></span>`}
+      ${next ? `<button class="btn" data-act="topic" data-v="${next[0]}">${next[1]} ›</button>` : `<button class="btn" data-act="unguide">${guideBackLabel()}</button>`}
+    </div>
+  </div>`;
+}
+function guideAllHTML() {
+  const back = S.back && S.back !== "guide" ? S.back : "setup";
+  const backLabel = { setup: "Back to setup", pass: "Back to the cards", discuss: "Back to clue time", vote: "Back to voting", result: "Back to results" }[back] || "Back";
+  return `${header()}
+  <div class="guide fade-in">
+    <button class="btn ghost" data-act="unguide">← ${backLabel}</button>
+    <div class="section">
+      <h2>How to play Imposter Party</h2>
+      <p class="lede muted">A party game for 3 to 20 players on one phone. Everyone gets a secret word except the imposters, who have to bluff. The catch: you never know for sure how many imposters there are. There might be none at all.</p>
+    </div>
+
+    <nav class="box" aria-label="Guide contents">
+      <h3>Contents</h3>
+      <div class="toc">${GUIDE_TOC.map(([id, t]) => `<button data-act="goto" data-v="${id}">${t}</button>`).join("")}</div>
+    </nav>
+
+    <section class="box gsec" id="g-quick">
+      <h2>Quick start</h2>
+      <ol>
+        <li>On the home screen, tap <b>Players</b> and add everyone's name. You need at least 3 players.</li>
+        <li>Tap <b>Imposters</b> to pick a mode and how many imposters (0 is allowed).</li>
+        <li>Tap <b>Deal the cards</b>.</li>
+        <li>Pass the phone. Each player presses and holds the card to see their word or role, then taps <b>Got it · pass it on</b>.</li>
+        <li>Give clues in turn, starting with the player shown on screen.</li>
+        <li>Vote as a group, reveal the truth, and collect points.</li>
+      </ol>
+    </section>
+
+    <section class="box gsec" id="g-flow">
+      <h2>A round, step by step</h2>
+      <h4>1. Dealing</h4>
+      <p>The app picks a word, decides who the imposters are, and maybe adds a secret twist. It also chooses who gives the first clue. That player is never an imposter, so they see their card first.</p>
+      <h4>2. Passing the phone</h4>
+      <p>The screen says who to hand the phone to. Only that player should look. Press and hold the card to peek; let go and it hides again. The <b>Got it</b> button only works once the card has been peeked at. The dots at the top show how many players have looked.</p>
+      <h4>3. Clue time</h4>
+      <p>The starting player's name is shown in large gold letters, along with the direction to go (clockwise or counter-clockwise). Each player says <b>one clue</b> about the word. Go around twice. Clues should prove you know the word without making it obvious to the imposters.</p>
+      <p>If a house rule card is shown, every clue must follow it. If the timer is on, tap <b>Start timer</b>. It beeps in the last 10 seconds and sounds an alarm at zero.</p>
+      <h4>4. Voting</h4>
+      <p>Discuss, then agree as a group on who to accuse. Tap their names and confirm.</p>
+      <h4>5. Results</h4>
+      <p>Everyone's role and word is revealed, along with any twist and the points each player earned. Tap <b>Next round</b> to keep going.</p>
+    </section>
+
+    <section class="box gsec" id="g-setup">
+      <h2>Setting up</h2>
+      <p>The home screen has a tile for each setting, showing its current value. Tap a tile to change it, then tap <b>Done</b> to go back.</p>
+      <h4>Players</h4>
+      <p>Type a name and tap <b>Add</b>. Tap × to remove someone, or ↑ to move them up the order. Names can be up to 18 characters, and two players can't share the same name. Add players in seating order: the phone is passed around in that order, and "clockwise" means following the list.</p>
+      <h4>Imposters see the category (Imposters tile)</h4>
+      <p>When on, imposters are told the category (for example "Animals") so they have something to bluff with. Turn it off for a harder game.</p>
+      <h4>Word categories (Words tile)</h4>
+      <p>Choose any mix of Food, Places, Animals, Jobs, Things, Activities, Weird and Tech. Each word comes with a close decoy, such as Pancake and Waffle.</p>
+      <h4>Your own words</h4>
+      <p>On the Words screen, use the <b>Your own words</b> box and type one pair per line as <code>word, decoy</code>. For example: <code>Grandma's lasagna, Grandpa's meatloaf</code>. Custom words appear under the category "Custom". Always add a decoy: without one, the Undercover and Split Room twists use the same word twice.</p>
+      <h4>Discussion timer</h4>
+      <p>On the Timer screen, choose Off, 2, 3 or 5 minutes. On supported phones it also vibrates when time runs out.</p>
+      <h4>Saving</h4>
+      <p>Players, settings and scores are saved in this browser on this device. They aren't shared with other phones.</p>
+    </section>
+
+    <section class="box gsec" id="g-modes">
+      <h2>Imposter modes</h2>
+      <div class="def">
+        <span class="tag special">Classic</span><p>Exactly the number of imposters you set, from 0 up to one less than the number of players. Set it to <b>0</b> for a pure bluffing round: everyone has the word, but they don't know that.</p>
+        <span class="tag special">Maybe</span><p>Uses your number, but each round has a 1-in-4 chance of having no imposter at all. Nobody is told which kind of round it is.</p>
+        <span class="tag special">Mystery</span><p>Total chaos. Roughly 15% of rounds have no imposter, about 8% make <b>everyone</b> an imposter, and the rest have between 1 and half the group. Imposters aren't told who their partners are, or how many there are.</p>
+      </div>
+      <p class="muted small">In Classic and Maybe, when there's more than one imposter, each imposter is shown the names of the others.</p>
+    </section>
+
+    <section class="box gsec" id="g-roles">
+      <h2>Roles</h2>
+      <div class="def">
+        <span class="tag crew">Crew</span><p>You have the secret word. Find the imposters, or work out that there aren't any.</p>
+        <span class="tag imp">Imposter</span><p>You don't have the word. Listen to the clues, fake a convincing one, and avoid being accused. If you're caught, you get one last chance to guess the word.</p>
+        <span class="tag special">Jester</span><p>You have the word, but you win big if the group votes you out. Act just suspicious enough. Appears only with the Jester twist.</p>
+        <span class="tag special">Accomplice</span><p>You have the word and you're told who the imposter is. You score if any imposter escapes, so protect them quietly. Appears only with the Accomplice twist.</p>
+        <span class="tag special">Detective</span><p>You have the word and you're told one name that is definitely not an imposter. Use it to steer the vote. Appears only with the Detective twist.</p>
+      </div>
+    </section>
+
+    <section class="box gsec" id="g-twists">
+      <h2>Twists</h2>
+      <p>With twists switched on, about half the rounds secretly use one twist, drawn from the ones you've enabled. Nobody is told which twist is active until the results.</p>
+      <div class="def">
+        <span class="tag special">Undercover</span><p>Imposters get the decoy word instead of nothing, so their card looks like a normal crew card. They don't know they're the imposter. Listen for clues that are slightly off.</p>
+        <span class="tag special">Split Room</span><p>No imposters. Half the group gets the word and half gets the decoy. Both halves will suspect each other. The correct vote is "no imposter". Needs 4+ players.</p>
+        <span class="tag special">The Jester</span><p>One word-holder becomes the Jester. If the Jester is accused, they score 3 and nobody else scores.</p>
+        <span class="tag special">Accomplice</span><p>One word-holder knows who the imposters are and wants them to escape.</p>
+        <span class="tag special">Detective</span><p>One word-holder learns the name of someone who is not an imposter. That person might still be the Jester.</p>
+      </div>
+      <p class="muted small">A twist is only used when it fits the round. The Jester, Accomplice and Detective need at least 3 non-imposters. Undercover and Accomplice need at least one imposter.</p>
+    </section>
+
+    <section class="box gsec" id="g-rules">
+      <h2>House rule cards</h2>
+      <p>When switched on, every round shows a yellow rule card on the clue screen that changes how clues are given. Examples:</p>
+      <ul>
+        <li>Clues must be exactly three words.</li>
+        <li>Speak only in questions.</li>
+        <li>Act your clue out. No talking.</li>
+        <li>Every clue must rhyme with the previous one.</li>
+      </ul>
+      <p>Anyone who breaks the rule looks suspicious, which is half the fun.</p>
+    </section>
+
+    <section class="box gsec" id="g-skip">
+      <h2>Skipping the word</h2>
+      <p>The starting player sees their card first. Below it is a <b>Skip this word</b> button that works once they've peeked. Use it if the word is too hard, too easy, or a word nobody knows.</p>
+      <ul>
+        <li>Skipping picks a new word and decoy. Roles don't change.</li>
+        <li>You can skip as many times as you like. The button shows the count.</li>
+        <li>Once the phone is passed to the next player, the word is locked for the round.</li>
+      </ul>
+      <p class="muted small">If the starter is ever an imposter (only possible when everyone is an imposter in Mystery mode), there's no word to skip, so the button doesn't appear.</p>
+    </section>
+
+    <section class="box gsec" id="g-vote">
+      <h2>Voting</h2>
+      <p>Talk it out and agree on one group answer. Then:</p>
+      <ul>
+        <li><b>Tap one or more names</b> to accuse them. You can accuse as many players as you think are lying.</li>
+        <li><b>Tap nobody</b> and press <b>There's no imposter</b> if you think the round was clean (or a Split Room).</li>
+        <li><b>Select everyone</b> if you think everyone was an imposter.</li>
+      </ul>
+      <p>To win, the group's accusation must match the real imposters exactly: no one missed and no one innocent included.</p>
+      <h4>Last chance for caught imposters</h4>
+      <p>On the results screen, each caught imposter gets a <b>Last chance: guessed the word?</b> button. Let them say a guess out loud. If they're right, tap the button to give them +1.</p>
+    </section>
+
+    <section class="box gsec" id="g-score">
+      <h2>Scoring</h2>
+      <div style="overflow-x:auto">
+      <table class="pts-table">
+        <thead><tr><th>What happened</th><th>Who scores</th><th>Points</th></tr></thead>
+        <tbody>
+          <tr><td>Group names exactly the right imposters</td><td>Every crew member, Jester and Detective</td><td>+1</td></tr>
+          <tr><td>No imposters, and the group says so</td><td>Every word-holder</td><td>+2</td></tr>
+          <tr><td>Imposter isn't accused</td><td>That imposter</td><td>+2</td></tr>
+          <tr><td>Caught imposter guesses the word</td><td>That imposter</td><td>+1</td></tr>
+          <tr><td>Any imposter escapes</td><td>Accomplice</td><td>+2</td></tr>
+          <tr><td>Jester is accused</td><td>Jester only (nobody else scores)</td><td>+3</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="example"><b>Example:</b> Ava, Ben and Chloe play with 1 imposter (Ben). The group accuses Ben and Chloe. That's not an exact match, so Ava and Chloe get nothing. Ben was caught, so no +2, but he guesses the word correctly and gets +1.</div>
+      <p>Points are added when you tap <b>Next round</b> or <b>Home</b>. Tap the <b>Scores</b> tile on the home screen to see the scoreboard. To clear it, tap <b>Reset scores</b> and then tap again to confirm.</p>
+    </section>
+
+    <section class="box gsec" id="g-tips">
+      <h2>Tips &amp; strategy</h2>
+      <h4>For word-holders</h4>
+      <ul>
+        <li>Give clues that are specific enough to prove you know the word, but vague enough not to give it away.</li>
+        <li>Don't assume there's an imposter. A clean round rewards the group for saying so.</li>
+        <li>In a Split Room, two groups of honest players will sound slightly different. Look for a 50/50 split rather than one odd clue.</li>
+      </ul>
+      <h4>For imposters</h4>
+      <ul>
+        <li>Use the category hint and earlier clues. Going later in the order helps.</li>
+        <li>Stay general, and agree confidently with other players' clues.</li>
+        <li>If you think you've worked out the word, save it for your last-chance guess.</li>
+      </ul>
+      <h4>For hosts</h4>
+      <ul>
+        <li>Start with Classic and 1 imposter. Add twists once everyone knows the basics.</li>
+        <li>Mystery mode works best with 6 or more players.</li>
+        <li>Use custom words for in-jokes: names of places, pets or shared memories.</li>
+      </ul>
+    </section>
+
+    <section class="box gsec" id="g-faq">
+      <h2>FAQ &amp; troubleshooting</h2>
+      <h4>Someone forgot their word.</h4>
+      <p>On the clue screen, tap <b>Someone forgot their card</b>. The phone goes back to the start of the pass so each player can peek again. The word can no longer be skipped.</p>
+      <h4>Someone saw another player's card.</h4>
+      <p>Finish the vote, then tap <b>Next round</b> to deal a fresh word.</p>
+      <h4>The Deal button is greyed out.</h4>
+      <p>You need at least 3 players and at least one category (or a custom word). A tile with a red edge shows what's missing.</p>
+      <h4>I can't add a player.</h4>
+      <p>Names must be unique and there's a limit of 20 players.</p>
+      <h4>There's no sound.</h4>
+      <p>Phones only play sound after you've tapped the page, and silent mode may mute it. The timer still counts down on screen.</p>
+      <h4>My scores disappeared.</h4>
+      <p>Scores are saved in this browser only. Private browsing, clearing site data, or switching phones starts fresh.</p>
+      <h4>Can the starting player be an imposter?</h4>
+      <p>No. The starting player is always someone with a word. The only exception is a Mystery round where everyone is an imposter.</p>
+    </section>
+
+    <button class="btn big" data-act="unguide">${backLabel}</button>
+  </div>`;
+}
+
+/* ---------- Render + events ---------- */
+let resetArmed = false;
+function render() {
+  const views = { guide: guideView, settings: settingsView, setup: setupView, pass: passView, discuss: discussView, vote: voteView, result: resultView };
+  app.innerHTML = (views[S.screen] || setupView)();
+  if (S.screen === "pass") bindCard();
+  save();
+}
+
+function bindCard() {
+  const card = $("#card"); if (!card) return;
+  const show = e => { e.preventDefault(); card.classList.add("peek"); if (!S.peeked) { S.peeked = true; document.querySelectorAll('[data-act="next"],[data-act="skip"]').forEach(b => b.disabled = false); } };
+  const hide = () => card.classList.remove("peek");
+  card.addEventListener("pointerdown", show);
+  card.addEventListener("pointerup", hide);
+  card.addEventListener("pointerleave", hide);
+  card.addEventListener("pointercancel", hide);
+  card.addEventListener("contextmenu", e => e.preventDefault());
+  card.addEventListener("keydown", e => { if (e.key === " " || e.key === "Enter") show(e); });
+  card.addEventListener("keyup", e => { if (e.key === " " || e.key === "Enter") hide(); });
+}
+
+function startTimer() {
+  if (timerId) return;
+  timerRunning = true;
+  timerId = setInterval(() => {
+    timerLeft = Math.max(0, timerLeft - 1);
+    const el = $("#timer");
+    if (el) { el.textContent = fmt(timerLeft); el.classList.toggle("low", timerLeft <= 15); }
+    if (timerLeft <= 10 && timerLeft > 0) beep(880, .06);
+    if (timerLeft === 0) { stopTimer(); beep(440, .35, 3); if (navigator.vibrate) try { navigator.vibrate([200, 100, 200]); } catch (e) {} render(); }
+  }, 1000);
+}
+function stopTimer() { clearInterval(timerId); timerId = null; timerRunning = false; }
+
+app.addEventListener("submit", e => {
+  e.preventDefault();
+  const inp = $("#newName"); const v = inp.value.trim().slice(0, 18);
+  if (!v) return;
+  if (S.players.some(p => p.toLowerCase() === v.toLowerCase())) { inp.classList.add("shake"); setTimeout(() => inp.classList.remove("shake"), 500); return; }
+  if (S.players.length >= 20) return;
+  S.players.push(v); render(); $("#newName").focus();
+});
+app.addEventListener("input", e => { if (e.target.id === "custom") { S.custom = e.target.value; save(); } });
+app.addEventListener("change", e => { if (e.target.id === "custom") render(); });
+
+app.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b || b.disabled) return;
+  const act = b.dataset.act, v = b.dataset.v;
+  if (act !== "reset") resetArmed = false;
+  switch (act) {
+    case "rm": S.players.splice(+b.dataset.i, 1); break;
+    case "mode": S.mode = v; break;
+    case "cnt": S.count = Math.max(0, Math.min(S.players.length - 1, S.count + +v)); break;
+    case "hint": S.hint = !S.hint; break;
+    case "twistOn": S.twistOn = !S.twistOn; break;
+    case "tw": S.twists[v] = !S.twists[v]; break;
+    case "rules": S.rules = !S.rules; break;
+    case "cat": S.cats = S.cats.includes(v) ? S.cats.filter(c => c !== v) : S.cats.concat(v); break;
+    case "timer": S.timer = +v; break;
+    case "reset": if (resetArmed) { S.scores = {}; S.roundNo = 0; resetArmed = false; } else resetArmed = true; break;
+    case "start": case "again":
+      if (act === "again") applyScores();
+      newRound(); beep(520, .08); window.scrollTo(0, 0); break;
+    case "skip": if (S.idx === 0 && !S.round.locked) { skipWord(); beep(700, .06); } break;
+    case "next":
+      S.round.locked = true;
+      S.peeked = false;
+      if (S.idx + 1 < S.round.roles.length) S.idx++;
+      else { S.screen = "discuss"; stopTimer(); timerLeft = S.timer; }
+      window.scrollTo(0, 0); break;
+    case "tgl": if (timerRunning) stopTimer(); else { if (timerLeft === 0) timerLeft = S.timer; startTimer(); } break;
+    case "treset": stopTimer(); timerLeft = S.timer; break;
+    case "repeek": stopTimer(); S.idx = 0; S.peeked = false; S.screen = "pass"; break;
+    case "tovote": stopTimer(); S.screen = "vote"; window.scrollTo(0, 0); break;
+    case "acc": { const a = S.round.accused; const i = a.indexOf(v); if (i >= 0) a.splice(i, 1); else a.push(v); break; }
+    case "accAll": S.round.accused = S.round.roles.map(r => r.name); break;
+    case "accNone": S.round.accused = []; break;
+    case "verdict": S.screen = "result"; beep(300, .15, 2); window.scrollTo(0, 0); break;
+    case "steal": { const s = S.round.stolen; const i = s.indexOf(v); if (i >= 0) s.splice(i, 1); else s.push(v); break; }
+    case "guide": if (S.screen !== "guide") S.back = S.screen; S.gtopic = v || null; S.screen = "guide"; window.scrollTo(0, 0); break;
+    case "topic": S.gtopic = v || null; window.scrollTo(0, 0); break;
+    case "unguide": S.screen = S.back && S.back !== "guide" ? S.back : "setup"; if (S.screen === "pass") S.peeked = false; window.scrollTo(0, 0); break;
+    case "sub": S.sub = v; S.screen = "settings"; window.scrollTo(0, 0); break;
+    case "home": S.screen = "setup"; window.scrollTo(0, 0); break;
+    case "up": { const i = +b.dataset.i; if (i > 0) [S.players[i - 1], S.players[i]] = [S.players[i], S.players[i - 1]]; break; }
+    case "tosetup": applyScores(); S.screen = "setup"; window.scrollTo(0, 0); break;
+  }
+  render();
+});
+
+/* ---------- Boot ---------- */
+function start(data) {
+  load(data && data.S);
+  if (S.screen === "discuss") timerLeft = S.timer;
+  if (!S.round && !["setup", "settings", "guide"].includes(S.screen)) S.screen = "setup";
+  render();
+}
+window.claude?.hot?.snapshot?.(() => ({ S }));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+})();
+</script>
+</body>
+</html>
