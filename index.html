@@ -49,8 +49,9 @@ body {
 }
 header.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
 header.top .hdr-right { margin-left: auto; }
-.logo { font-family: var(--f-display); font-size: clamp(20px, 6.2vw, 26px); white-space: nowrap; letter-spacing: .5px; line-height: 1; margin: 0; }
-.logo span { color: var(--gold); }
+@media (max-width: 430px) { header.top .round-tag { display: none; } }
+.logo { font-family: var(--f-display); font-size: clamp(17px, 5.2vw, 24px); white-space: nowrap; letter-spacing: .5px; line-height: 1; margin: 0; }
+.logo > span > span { color: var(--gold); }
 .round-tag { font-family: var(--f-mono); font-size: 12px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
 h2 { font-family: var(--f-display); font-weight: 400; font-size: 22px; margin: 0; text-wrap: balance; line-height: 1.15; }
 h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin: 0; font-family: var(--f-mono); font-weight: 700; }
@@ -112,7 +113,7 @@ textarea { min-height: 84px; resize: vertical; font-family: var(--f-mono); font-
 .switch[aria-pressed=true]::after { left: 25px; background: var(--stage); }
 
 .scores { display: flex; flex-direction: column; gap: 6px; }
-.score { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--line); font-variant-numeric: tabular-nums; }
+.score { display: grid; grid-template-columns: 30px 1fr auto; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--line); font-variant-numeric: tabular-nums; }
 .score:last-child { border-bottom: 0; }
 .score .pts { font-family: var(--f-mono); font-weight: 700; color: var(--gold); }
 .score .delta { font-family: var(--f-mono); font-size: 13px; color: var(--mint); margin-left: 6px; }
@@ -157,8 +158,9 @@ textarea { min-height: 84px; resize: vertical; font-family: var(--f-mono); font-
 .callout { border-left: 4px solid var(--sky); padding: 4px 0 4px 12px; font-size: 15px; }
 
 /* Vote */
-.vote-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
-.vote-grid button { border: 2px solid var(--line); background: var(--panel); border-radius: 12px; padding: 14px 10px; font-weight: 800; font-size: 16px; word-break: break-word; }
+.vote-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+.vote-grid button { border: 2px solid var(--line); background: var(--panel); border-radius: 12px; padding: 12px 10px; font-weight: 800; font-size: 16px; word-break: break-word; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.vote-grid button[aria-pressed=true] .av { filter: drop-shadow(0 0 6px rgba(255,92,122,.7)); transform: rotate(-6deg); }
 .vote-grid button[aria-pressed=true] { border-color: var(--coral); background: #3d1430; color: var(--coral); }
 
 /* Results */
@@ -167,7 +169,7 @@ textarea { min-height: 84px; resize: vertical; font-family: var(--f-mono); font-
 .reveal-word { text-align: center; display: flex; flex-direction: column; gap: 4px; }
 .reveal-word .w { font-family: var(--f-display); font-size: 28px; }
 .roles { display: flex; flex-direction: column; gap: 6px; }
-.rrow { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 10px 12px; border-radius: 10px; background: var(--stage); border: 1px solid var(--line); }
+.rrow { display: grid; grid-template-columns: 40px 1fr auto; gap: 8px; align-items: center; padding: 10px 12px; border-radius: 10px; background: var(--stage); border: 1px solid var(--line); }
 .rrow .nm { font-weight: 800; min-width: 0; word-break: break-word; }
 .rrow .nm small { display: block; font-weight: 400; color: var(--muted); font-size: 13px; }
 .tag { font-family: var(--f-mono); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; letter-spacing: .08em; text-transform: uppercase; border: 1px solid currentColor; white-space: nowrap; }
@@ -180,7 +182,30 @@ textarea { min-height: 84px; resize: vertical; font-family: var(--f-mono); font-
 @keyframes fin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .shake { animation: shake .5s ease; }
 @keyframes shake { 20%,60% { transform: translateX(-6px) } 40%,80% { transform: translateX(6px) } }
-@media (prefers-reduced-motion: reduce) { .fade-in, .shake { animation: none; } .btn, .card .inner, .card .cover { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .fade-in, .shake, .bob, .bubble, .suspicious .pupils, .hero .disguise, .unmask .disguise { animation: none; } .btn, .card .inner, .card .cover { transition: none; } }
+/* Art */
+.ic { flex: none; vertical-align: -3px; }
+.av { flex: none; display: block; overflow: visible; }
+.logo { display: inline-flex; align-items: center; gap: 6px; }
+.logo .ic { color: var(--gold); }
+.hero { width: 100%; height: auto; max-height: 132px; display: block; overflow: visible; }
+.bob { animation: bob 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-4px) } }
+.bubble { animation: pop 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: 0% 100%; }
+@keyframes pop { 0%, 60%, 100% { transform: scale(1) } 70% { transform: scale(1.12) rotate(-4deg) } }
+.suspicious .pupils, .hero .disguise { animation: shifty 3s ease-in-out infinite; }
+@keyframes shifty { 0%, 40%, 100% { transform: translateX(0) } 50%, 70% { transform: translateX(-2px) } 80%, 90% { transform: translateX(2px) } }
+.unmask .disguise { animation: unmask 1s cubic-bezier(.5,0,.75,0) .5s both; transform-box: fill-box; transform-origin: 50% 0; }
+@keyframes unmask { to { transform: translate(14px, 46px) rotate(38deg); opacity: 0; } }
+.confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+.card .art { width: min(118px, 30vw); height: auto; }
+.card .cover .art { width: min(132px, 34vw); }
+.lineup { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; }
+.lineup figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; font-weight: 800; font-size: 14px; max-width: 90px; text-align: center; overflow-wrap: anywhere; }
+.tile .tl { display: inline-flex; align-items: center; gap: 6px; }
+.tile .tl .ic { color: var(--gold); }
+.twist b { display: inline-flex; align-items: center; gap: 6px; }
+.twist b .ic { color: var(--sky); }
 /* Home tiles & sub-screens */
 .home, .sub { display: flex; flex-direction: column; gap: 16px; }
 .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
@@ -188,12 +213,12 @@ textarea { min-height: 84px; resize: vertical; font-family: var(--f-mono); font-
 .tile:active { background: var(--panel-2); }
 .tile.warn { border-color: var(--coral); }
 .tile .tl { font-family: var(--f-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
-.tile .tv { font-family: var(--f-display); font-size: 26px; line-height: 1.15; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile .tv { font-family: var(--f-display); font-size: 24px; line-height: 1.15; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tile .tn { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chev { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 22px; color: var(--muted); }
 .back { align-self: flex-start; border: 0; background: transparent; color: var(--gold); font-weight: 800; font-size: 16px; padding: 6px 0; }
 .plist { display: flex; flex-direction: column; gap: 6px; }
-.prow { display: grid; grid-template-columns: 26px 1fr auto auto; gap: 8px; align-items: center; background: var(--stage); border: 1px solid var(--line); border-radius: 10px; padding: 6px 6px 6px 10px; }
+.prow { display: grid; grid-template-columns: 32px 1fr auto auto; gap: 8px; align-items: center; background: var(--stage); border: 1px solid var(--line); border-radius: 10px; padding: 6px 6px 6px 10px; }
 .prow .num { font-family: var(--f-mono); color: var(--muted); font-size: 13px; }
 .prow .pn { font-weight: 700; min-width: 0; overflow-wrap: anywhere; }
 .mini { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); font-size: 16px; font-weight: 800; }
@@ -315,6 +340,134 @@ const rnd = n => Math.floor(Math.random() * n);
 const pick = a => a[rnd(a.length)];
 function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 const app = $("#app");
+
+/* ---------- Art: original cartoon faces, disguises and icons (all inline SVG) ---------- */
+const AV_COLORS = ["#ff7a59","#ffcf33","#4fe3b5","#6fb6ff","#c38bff","#ff5c9a","#8be36b","#ffa63d","#5ad2f4","#f78fb3"];
+function hash(str) { let h = 2166136261; for (const c of String(str)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+const INK = "#1a0f2e";
+const MOUTHS = [
+  `<path d="M26 43 Q32 49 38 43" stroke="${INK}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`,
+  `<ellipse cx="32" cy="45" rx="3" ry="3.6" fill="${INK}"/>`,
+  `<path d="M25 42 H39 Q39 50 32 50 Q25 50 25 42Z" fill="${INK}"/><path d="M27 42 H37 V44.2 H27Z" fill="#fff"/>`,
+  `<path d="M27 45 Q33 47 38 41.5" stroke="${INK}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`,
+  `<path d="M27 45 H37" stroke="${INK}" stroke-width="2.6" stroke-linecap="round"/>`
+];
+const HATS = [
+  "",
+  `<path d="M26 12 L32 0.5 L38 12Z" fill="#f6f0ff" stroke="${INK}" stroke-width="1.5" stroke-linejoin="round"/><path d="M28.6 7 L35.4 7" stroke="#ff5c7a" stroke-width="2"/><circle cx="32" cy="1.8" r="2.2" fill="#ff5c7a"/>`,
+  `<path d="M32 9 V3" stroke="${INK}" stroke-width="2"/><circle cx="32" cy="3" r="2.6" fill="#ff5c7a"/>`,
+  `<path d="M32 9 V4" stroke="#2f9e44" stroke-width="2"/><path d="M32 5 Q26 0 23 4 Q27 8 32 5Z M32 5 Q38 0 41 4 Q37 8 32 5Z" fill="#4fe3b5" stroke="${INK}" stroke-width="1"/>`,
+  `<path d="M44 13 L37 8 L37 18Z M44 13 L51 8 L51 18Z" fill="#ff5c7a" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/><circle cx="44" cy="13" r="2.3" fill="#ff5c7a" stroke="${INK}" stroke-width="1.2"/>`,
+  `<path d="M16.5 21 C18.5 11 24.5 7.5 32 7.5 C39.5 7.5 45.5 11 47.5 21 Z" fill="#6fb6ff"/><rect x="15.5" y="18.5" width="33" height="5" rx="2.5" fill="#f6f0ff"/><circle cx="32" cy="7" r="3" fill="#f6f0ff"/>`
+];
+const DISGUISE = `<g class="disguise">
+  <path d="M17 20.5 Q24 16.5 30 20.5 M34 20.5 Q40 16.5 47 20.5" stroke="${INK}" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+  <circle cx="24" cy="30" r="8.2" fill="rgba(255,255,255,.15)" stroke="${INK}" stroke-width="3"/>
+  <circle cx="40" cy="30" r="8.2" fill="rgba(255,255,255,.15)" stroke="${INK}" stroke-width="3"/>
+  <path d="M30.5 29 Q32 27 33.5 29 M15.8 28 L10 25.5 M48.2 28 L54 25.5" stroke="${INK}" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <ellipse cx="32" cy="38" rx="4.6" ry="5.6" fill="#f2a58e" stroke="${INK}" stroke-width="1.6"/>
+  <path d="M19 46 C23 40 28.5 41 32 43.5 C35.5 41 41 40 45 46 C41 44.5 36.5 46.5 32 45.5 C27.5 46.5 23 44.5 19 46Z" fill="${INK}"/>
+</g>`;
+const JESTER_HAT = `<path d="M15 19 Q11 5 3 7 Q13 11 20 17Z M49 19 Q53 5 61 7 Q51 11 44 17Z" fill="#c38bff" stroke="${INK}" stroke-width="1.3" stroke-linejoin="round"/><path d="M18 18 Q32 -7 46 18Z" fill="#ff5c7a" stroke="${INK}" stroke-width="1.3" stroke-linejoin="round"/><rect x="14.5" y="16" width="35" height="5.5" rx="2.7" fill="#ffcf33" stroke="${INK}" stroke-width="1.2"/><circle cx="3.5" cy="7" r="3" fill="#ffcf33"/><circle cx="60.5" cy="7" r="3" fill="#ffcf33"/><circle cx="32" cy="2.5" r="3" fill="#ffcf33"/>`;
+const SHADES = `<path d="M14 27 H50" stroke="${INK}" stroke-width="2.4"/><path d="M15.5 26 H30.5 Q30.5 36.5 23 36.5 Q15.5 36.5 15.5 26Z M33.5 26 H48.5 Q48.5 36.5 41 36.5 Q33.5 36.5 33.5 26Z" fill="${INK}"/><path d="M18.5 28.5 L22 28.5 M36.5 28.5 L40 28.5" stroke="#fff" stroke-opacity=".6" stroke-width="1.6" stroke-linecap="round"/>`;
+const LENS = `<g class="lens"><circle cx="49" cy="46" r="8" fill="rgba(111,182,255,.35)" stroke="${INK}" stroke-width="3"/><path d="M43.5 51.5 L36 59" stroke="${INK}" stroke-width="4.2" stroke-linecap="round"/></g>`;
+
+function avatarInner(name, o = {}) {
+  const h = hash(name);
+  const col = o.mystery ? "#45386d" : AV_COLORS[h % AV_COLORS.length];
+  const mouth = MOUTHS[(h >>> 5) % MOUTHS.length];
+  const hat = o.hat === "jester" ? JESTER_HAT : o.disguise ? "" : HATS[(h >>> 9) % HATS.length];
+  const px = [-1.6, 0, 1.6][(h >>> 13) % 3];
+  let face;
+  if (o.mystery) {
+    face = `<text x="32" y="45" text-anchor="middle" font-family="Bowlby One, Arial Black, sans-serif" font-size="30" fill="#ffcf33">?</text>`;
+  } else {
+    const eyes = o.shades ? SHADES : `<g class="eyes"><circle cx="24" cy="30" r="6.5" fill="#fff"/><circle cx="40" cy="30" r="6.5" fill="#fff"/><g class="pupils"><circle cx="${24 + px}" cy="31" r="3.2" fill="${INK}"/><circle cx="${40 + px}" cy="31" r="3.2" fill="${INK}"/></g></g>`;
+    face = `${eyes}<circle cx="16.5" cy="40" r="3.2" fill="#ff5c7a" opacity=".35"/><circle cx="47.5" cy="40" r="3.2" fill="#ff5c7a" opacity=".35"/>${o.disguise ? "" : mouth}${o.disguise ? DISGUISE : ""}`;
+  }
+  return `<ellipse cx="32" cy="61" rx="20" ry="2.6" fill="#000" opacity=".28"/>
+    <path d="M10 60 C10 26 18 8 32 8 C46 8 54 26 54 60 Q43 56.5 32 60 Q21 56.5 10 60Z" fill="${col}" stroke="${INK}" stroke-width="2"/>
+    <path d="M16.5 32 C17 20 22.5 13.5 29 12" stroke="#fff" stroke-opacity=".38" stroke-width="3" fill="none" stroke-linecap="round"/>
+    ${face}${hat}${o.lens ? LENS : ""}`;
+}
+function avatar(name, o = {}) {
+  const sz = o.size || 48;
+  return `<svg class="av${o.cls ? " " + o.cls : ""}" width="${sz}" height="${sz}" viewBox="0 0 64 64" aria-hidden="true" focusable="false">${avatarInner(name, o)}</svg>`;
+}
+function roleArt(r, size) {
+  if (r.role === "imp" && r.word === null) return avatar(r.name, { disguise: true, size, cls: "suspicious" });
+  if (r.role === "jester") return avatar(r.name, { hat: "jester", size });
+  if (r.role === "acc") return avatar(r.name, { shades: true, size });
+  if (r.role === "det") return avatar(r.name, { lens: true, size });
+  return avatar(r.name, { size });
+}
+
+const ICONS = {
+  mask: `<circle cx="7.5" cy="10" r="3.5"/><circle cx="16.5" cy="10" r="3.5"/><path d="M11 10h2M4 9 2 8M20 9l2-1"/><path d="M5.5 17.5c2-2.2 4.3-1.8 6.5-.6 2.2-1.2 4.5-1.6 6.5.6-2.2-.4-4.3.8-6.5.4-2.2.4-4.3-.8-6.5-.4z" fill="currentColor"/>`,
+  players: `<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5"/><circle cx="17" cy="9" r="2.8"/><path d="M15.5 14.2c3.4-.6 6 1.8 6 5.3"/>`,
+  twists: `<path d="M11 3l1.8 5.2L18 10l-5.2 1.8L11 17l-1.8-5.2L4 10l5.2-1.8z"/><path d="M19 14.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/>`,
+  words: `<path d="M4 4.5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-10l-5 4v-4H4a1 1 0 0 1-1-1v-10a1 1 0 0 1 1-1z"/><path d="M7 8.5h10M7 12.5h6"/>`,
+  timer: `<path d="M6 3h12M6 21h12"/><path d="M7 3c0 4.5 4 6 5 9-1 3-5 4.5-5 9M17 3c0 4.5-4 6-5 9 1 3 5 4.5 5 9"/><path d="M10 18.5h4" />`,
+  scores: `<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M9 17h6v4H9z"/>`,
+  guide: `<path d="M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4zM20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z"/>`,
+  detective: `<circle cx="10" cy="10" r="6"/><path d="M14.5 14.5 20 20"/>`,
+  jester: `<path d="M4 18l2-9 6 5 6-5 2 9z"/><circle cx="6" cy="7" r="1.6"/><circle cx="18" cy="7" r="1.6"/><circle cx="12" cy="11" r="1.6"/>`,
+  accomplice: `<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/>`,
+  split: `<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M12 3v18" stroke-dasharray="2 2.4"/>`,
+  undercover: `<path d="M3 16c3 2 15 2 18 0"/><path d="M6 15l1.5-7c.3-1.5 2-1.5 3 0L12 9l1.5-1c1-1.5 2.7-1.5 3 0L18 15"/>`,
+  rule: `<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>`,
+  Food: `<path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 3c-2 0-3 3-3 7h3v11"/>`,
+  Places: `<path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>`,
+  Animals: `<circle cx="6.5" cy="10" r="2"/><circle cx="12" cy="6" r="2"/><circle cx="17.5" cy="10" r="2"/><path d="M8 17.5c0-3 2-5.5 4-5.5s4 2.5 4 5.5c0 2-2 2.5-4 2.5s-4-.5-4-2.5z"/>`,
+  Jobs: `<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5h6v2M3 13h18"/>`,
+  Things: `<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/>`,
+  Activities: `<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>`,
+  Weird: `<ellipse cx="12" cy="13" rx="9.5" ry="3"/><path d="M7 12a5 5 0 0 1 10 0"/><path d="M8 18.5l-1 2.5M12 17.5v3.5M16 18.5l1 2.5"/>`,
+  Tech: `<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18h2"/>`,
+  Custom: `<path d="M4 20l1-4L16 5l3 3L8 19z"/>`
+};
+function icon(name, size = 18) {
+  return `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICONS[name] || ""}</svg>`;
+}
+
+/* Home hero: a suspicious line-up under a spotlight. One of them is in disguise. */
+function heroArt() {
+  const cast = [["Mo", 0, 52], ["Juno", 1, 46], ["?", 2, 66], ["Pip", 3, 46], ["Kai", 4, 52]];
+  const xs = [26, 82, 127, 196, 242];
+  return `<svg class="hero" viewBox="0 0 320 132" role="img" aria-label="Five cartoon party guests in a line-up; the one in the middle wears fake glasses and a mustache">
+    <defs>
+      <radialGradient id="spot" cx="50%" cy="0%" r="100%"><stop offset="0" stop-color="#ffcf33" stop-opacity=".35"/><stop offset="1" stop-color="#ffcf33" stop-opacity="0"/></radialGradient>
+    </defs>
+    <path d="M140 0 L180 0 L250 124 L70 124Z" fill="url(#spot)"/>
+    <ellipse cx="160" cy="124" rx="150" ry="6" fill="#000" opacity=".25"/>
+    ${[10, 50, 90].map(y => `<path d="M0 ${y + 14} H320" stroke="#45386d" stroke-width="1" stroke-dasharray="3 6" opacity=".6"/>`).join("")}
+    ${cast.map(([nm, i, sz], k) => `<g class="bob" style="animation-delay:${k * .35}s">
+      <svg x="${xs[k]}" y="${124 - sz}" width="${sz}" height="${sz}" viewBox="0 0 64 64">${avatarInner(nm === "?" ? "Zed" : nm, nm === "?" ? { disguise: true } : {})}</svg></g>`).join("")}
+    <g class="bubble"><path d="M182 14 h28 a8 8 0 0 1 8 8 v10 a8 8 0 0 1 -8 8 h-16 l-8 7 v-7 h-4 a8 8 0 0 1 -8 -8 v-10 a8 8 0 0 1 8 -8z" fill="#f6f0ff" stroke="${INK}" stroke-width="2"/>
+    <text x="196" y="35" text-anchor="middle" font-family="Bowlby One, Arial Black, sans-serif" font-size="17" fill="${INK}">?!</text></g>
+  </svg>`;
+}
+
+/* Confetti burst for big wins */
+function confetti(colors) {
+  try { if (matchMedia("(prefers-reduced-motion: reduce)").matches) return; } catch (e) {}
+  const c = document.createElement("canvas"); c.className = "confetti"; document.body.appendChild(c);
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W = c.width = innerWidth * dpr, H = c.height = innerHeight * dpr; const ctx = c.getContext("2d");
+  const parts = Array.from({ length: 140 }, () => ({
+    x: W / 2 + (Math.random() - .5) * W * .3, y: H * .3, vx: (Math.random() - .5) * 16 * dpr, vy: (-Math.random() * 14 - 4) * dpr,
+    r: (4 + Math.random() * 5) * dpr, a: Math.random() * 6, va: (Math.random() - .5) * .4, col: colors[rnd(colors.length)], sq: Math.random() < .5
+  }));
+  const t0 = performance.now();
+  (function frame(t) {
+    const el = t - t0; ctx.clearRect(0, 0, W, H);
+    parts.forEach(p => { p.vy += .45 * dpr; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.a += p.va;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.globalAlpha = Math.max(0, 1 - el / 2800); ctx.fillStyle = p.col;
+      if (p.sq) ctx.fillRect(-p.r / 2, -p.r / 4, p.r, p.r / 2); else { ctx.beginPath(); ctx.arc(0, 0, p.r / 2.4, 0, 7); ctx.fill(); } ctx.restore(); });
+    if (el < 2800) requestAnimationFrame(frame); else c.remove();
+  })(t0);
+}
+
 
 function customPairs() {
   return S.custom.split("\n").map(l => l.split(",").map(x => x.trim())).filter(p => p[0])
@@ -475,7 +628,7 @@ function beep(freq = 660, dur = .18, times = 1) {
 function header() {
   const r = S.round && ["pass", "discuss", "vote", "result"].includes(S.screen) ? `Round ${S.round.no}` : "";
   const btn = S.screen === "guide" ? "" : `<button class="helpbtn" data-act="guide" aria-label="Open the user guide">? Guide</button>`;
-  return `<header class="top"><h1 class="logo">IMPOSTER<span>.</span>PARTY</h1><div class="hdr-right">${S.screen === "guide" ? "" : r ? `<span class="round-tag">${r}</span>` : ""}${btn}</div></header>`;
+  return `<header class="top"><h1 class="logo">${icon("mask", 24)}<span>IMPOSTER<span>.</span>PARTY</span></h1><div class="hdr-right">${S.screen === "guide" ? "" : r ? `<span class="round-tag">${r}</span>` : ""}${btn}</div></header>`;
 }
 
 const TIMERS = [[0,"Off"],[120,"2 min"],[180,"3 min"],[300,"5 min"]];
@@ -498,13 +651,13 @@ function setupView() {
   const top = sortedScores()[0];
   const tile = (sub, label, value, note, warn) => `
     <button class="tile${warn ? " warn" : ""}" data-act="sub" data-v="${sub}">
-      <span class="tl">${label}</span><span class="tv">${value}</span><span class="tn">${note}</span><span class="chev" aria-hidden="true">›</span>
+      <span class="tl">${icon(sub === "imposters" ? "mask" : sub, 15)}${label}</span><span class="tv">${value}</span><span class="tn">${note}</span><span class="chev" aria-hidden="true">›</span>
     </button>`;
   return `${header()}
   <div class="home fade-in">
     <div class="section">
+      ${heroArt()}
       <h2>One word. Some liars. Maybe.</h2>
-      <p class="muted small">Everyone gets the secret word except the imposters. There could be one, several, or none.</p>
     </div>
     <div class="tiles">
       ${tile("players", "Players", n, n < 3 ? "Add at least 3" : esc(S.players.slice(0, 3).join(", ")) + (n > 3 ? "…" : ""), n < 3)}
@@ -528,7 +681,7 @@ function settingsView() {
       <input class="grow" type="text" id="newName" placeholder="Add a player" maxlength="18" autocomplete="off" aria-label="Player name">
       <button class="btn" type="submit">Add</button>
     </form>
-    <div class="plist">${S.players.map((p, i) => `<div class="prow"><span class="num">${i + 1}</span><span class="pn">${esc(p)}</span>
+    <div class="plist">${S.players.map((p, i) => `<div class="prow"><span class="num" title="Seat ${i + 1}">${avatar(p, { size: 30 })}</span><span class="pn">${esc(p)}</span>
       <button class="mini" data-act="up" data-i="${i}" aria-label="Move ${esc(p)} up" ${i === 0 ? "disabled" : ""}>↑</button>
       <button class="mini" data-act="rm" data-i="${i}" aria-label="Remove ${esc(p)}">×</button></div>`).join("")}</div>
     <p class="small ${n < 3 ? "" : "muted"}" ${n < 3 ? 'style="color:var(--coral)"' : ""}>${n < 3 ? "You need at least 3 players." : n + " players · up to 20 · names must be different"}</p>`;
@@ -557,14 +710,14 @@ function settingsView() {
     </div>
     ${S.twistOn ? `<div class="twists">${Object.keys(TWISTS).map(t => `
       <button class="twist" data-act="tw" data-v="${t}" aria-pressed="${!!S.twists[t]}">
-        <span class="tick">${S.twists[t] ? "✓" : ""}</span><b>${TWISTS[t].name}</b><span class="d">${TWISTS[t].d}</span>
+        <span class="tick">${S.twists[t] ? "✓" : ""}</span><b>${icon(t, 16)}${TWISTS[t].name}</b><span class="d">${TWISTS[t].d}</span>
       </button>`).join("")}</div>` : ""}
     <div class="switch-row">
       <div><b>House rule cards</b><p class="small muted">A silly rule for how clues are given each round.</p></div>
       <button class="switch" data-act="rules" aria-pressed="${S.rules}" aria-label="House rule cards"></button>
     </div>`;
   if (sub === "words") body = `
-    <div class="cats">${Object.keys(BANK).map(c => `<button class="tog" data-act="cat" data-v="${c}" aria-pressed="${S.cats.includes(c)}">${c}</button>`).join("")}</div>
+    <div class="cats">${Object.keys(BANK).map(c => `<button class="tog" data-act="cat" data-v="${c}" aria-pressed="${S.cats.includes(c)}">${icon(c, 15)} ${c}</button>`).join("")}</div>
     <label for="custom"><b>Your own words</b></label>
     <p class="small muted">One per line: <code>word, decoy</code>. The decoy is used by Undercover and Split Room.</p>
     <textarea id="custom" placeholder="Grandma's lasagna, Grandpa's meatloaf">${esc(S.custom)}</textarea>`;
@@ -575,7 +728,7 @@ function settingsView() {
     <p class="small muted">The timer beeps in the last 10 seconds and sounds an alarm at zero. You start it yourself on the clue screen.</p>`;
   if (sub === "scores") {
     const sc = sortedScores();
-    body = sc.length ? `<div class="scores">${sc.map(([k, v], i) => `<div class="score"><span>${esc(k)}${i === 0 ? ' <span class="tag special">Leader</span>' : ""}</span><span class="pts">${v}</span></div>`).join("")}</div>
+    body = sc.length ? `<div class="scores">${sc.map(([k, v], i) => `<div class="score">${avatar(k, { size: 28 })}<span>${esc(k)}${i === 0 ? ' <span class="tag special">Leader</span>' : ""}</span><span class="pts">${v}</span></div>`).join("")}</div>
       <button class="btn ghost" data-act="reset">${resetArmed ? "Tap again to reset all scores" : "Reset scores"}</button>`
       : `<p class="muted">No scores yet. Points appear here after your first round.</p>`;
     body += `<button class="linkish" data-act="guide" data-v="g-score">How scoring works ›</button>`;
@@ -595,6 +748,7 @@ function roleCard(r) {
   if (r.role === "imp" && r.word === null) {
     return `<div class="face inner imp">
       <span class="rolepill" style="color:var(--coral)">IMPOSTER</span>
+      ${roleArt(r, 118).replace('class="av', 'class="av art')}
       <div class="word">You're the imposter</div>
       ${hintLine}
       ${r.note ? `<p class="note">Your partners: <b>${esc(r.note)}</b></p>` : ""}
@@ -607,6 +761,7 @@ function roleCard(r) {
   if (r.role === "det") { pill = "DETECTIVE"; cls = "special"; extra = `<p class="note"><b>${esc(r.note)}</b> is definitely not an imposter.</p>`; }
   return `<div class="face inner ${cls}">
     ${pill ? `<span class="rolepill" style="color:var(--sky)">${pill}</span>` : `<span class="label">Your secret word</span>`}
+    ${roleArt(r, 118).replace('class="av', 'class="av art')}
     <div class="word">${esc(r.word)}</div>
     ${pill ? `<p class="note muted">Word above. Keep it secret.</p>` : ""}
     ${extra}
@@ -623,7 +778,7 @@ function passView() {
     <p class="muted">Pass the phone to</p>
     <div class="who">${esc(r.name)}</div>
     <div class="card" id="card" role="button" tabindex="0" aria-label="Press and hold to see your card">
-      <div class="face cover"><div class="q">?</div><p><b>Press and hold</b> to peek</p><p class="small muted">Only ${esc(r.name)} should look.</p></div>
+      <div class="face cover">${avatar(r.name, { size: 132, cls: "art" })}<p><b>Press and hold</b> to peek</p><p class="small muted">Only ${esc(r.name)} should look.</p></div>
       ${roleCard(r)}
     </div>
     ${canSkip ? `<p class="small muted" style="max-width:34ch">You give the first clue, so you're not an imposter. Don't like this word? Swap it before anyone else sees it.</p>
@@ -646,12 +801,13 @@ function discussView() {
     <h2>Clue time</h2>
     <div class="box" style="align-items:center;text-align:center;gap:6px;border-color:var(--gold)">
       <span class="round-tag">First clue from</span>
+      ${avatar(R.starter, { size: 76, cls: "bob" })}
       <div class="who" style="font-family:var(--f-display);font-size:clamp(34px,10vw,54px);line-height:1.05;color:var(--gold);word-break:break-word">${esc(R.starter)}</div>
       <p class="small muted">Then go ${R.dir === "clockwise" ? "clockwise ↻" : "counter-clockwise ↺"}. One clue each, two laps.</p>
     </div>
     <p class="callout">${modeHint}</p>
   </div>
-  ${R.rule ? `<div class="rulecard"><h3>House rule</h3><p>${esc(R.rule)}</p></div>` : ""}
+  ${R.rule ? `<div class="rulecard"><h3>${icon("rule", 14)} House rule</h3><p>${esc(R.rule)}</p></div>` : ""}
   ${S.timer ? `<div class="box" style="align-items:center">
     <div class="timer ${timerLeft <= 15 ? "low" : ""}" id="timer" aria-live="off">${fmt(timerLeft)}</div>
     <div class="row" style="justify-content:center">
@@ -671,7 +827,7 @@ function voteView() {
     <h2>Who's lying?</h2>
     <p class="muted">Agree as a group and tap everyone you accuse. Tap nobody if you think there's no imposter.</p>
   </div>
-  <div class="vote-grid">${R.roles.map(r => `<button data-act="acc" data-v="${esc(r.name)}" aria-pressed="${sel.has(r.name)}">${esc(r.name)}</button>`).join("")}</div>
+  <div class="vote-grid">${R.roles.map(r => `<button data-act="acc" data-v="${esc(r.name)}" aria-pressed="${sel.has(r.name)}">${avatar(r.name, { size: 52 })}<span>${esc(r.name)}</span></button>`).join("")}</div>
   <div class="row">
     <button class="btn ghost grow" data-act="accAll">Select everyone</button>
     <button class="btn ghost grow" data-act="accNone">Clear</button>
@@ -685,20 +841,24 @@ function resultView() {
   const imps = R.roles.filter(r => r.role === "imp");
   const k = imps.length, n = R.roles.length;
   let headline, cls = res.outcome;
+  const accSet = new Set(R.accused);
   if (res.outcome === "jest") headline = "The Jester fooled you all!";
   else if (R.twist === "split") headline = res.outcome === "win" ? "You saw through the Split Room!" : "There was no imposter. The room was split.";
   else if (k === 0) headline = res.outcome === "win" ? "Correct! There was no imposter." : "There was no imposter all along!";
   else if (k === n) headline = res.outcome === "win" ? "You caught it: everyone was an imposter!" : "Everyone was an imposter!";
   else headline = res.outcome === "win" ? `Crew wins! ${k === 1 ? "Imposter" : "Imposters"} caught.` : `${k === 1 ? "The imposter" : "The imposters"} got away!`;
 
-  const accSet = new Set(R.accused);
   const caught = imps.filter(r => accSet.has(r.name) && r.word === null);
   const roleLabel = r => r.role === "imp" ? ["Imposter", "imp"] : r.role === "jester" ? ["Jester", "special"] : r.role === "acc" ? ["Accomplice", "special"] : r.role === "det" ? ["Detective", "special"] : ["Crew", "crew"];
   return `${header()}
   <div class="section fade-in" style="gap:14px">
+    <div class="lineup">${(k && k < n ? imps : res.outcome === "jest" ? R.roles.filter(r => r.role === "jester") : R.roles).map(r => {
+      const caughtNow = r.role === "imp" && accSet.has(r.name);
+      const art = r.role === "imp" ? avatar(r.name, { disguise: true, size: k && k < n ? 72 : 46, cls: caughtNow && r.word === null ? "unmask" : "" }) : roleArt(r, res.outcome === "jest" ? 72 : 46);
+      return `<figure>${art}<figcaption>${esc(r.name)}</figcaption></figure>`; }).join("")}</div>
     <div class="verdict ${cls}" id="verdict">${esc(headline)}</div>
     <div class="reveal-word">
-      <span class="round-tag">${esc(R.cat)}${R.twist ? " · twist: " + TWISTS[R.twist].name : ""}</span>
+      <span class="round-tag">${icon(R.cat, 14)} ${esc(R.cat)}${R.twist ? " · twist: " + TWISTS[R.twist].name : ""}</span>
       <span class="w">${esc(R.word)}</span>
       ${R.twist === "split" || R.twist === "undercover" ? `<span class="small muted">Decoy word: <b>${esc(R.decoy)}</b></span>` : ""}
     </div>
@@ -709,7 +869,7 @@ function resultView() {
     <div class="roles">${R.roles.map(r => {
       const [lab, c] = roleLabel(r);
       const d = res.delta[r.name];
-      return `<div class="rrow"><div class="nm">${esc(r.name)} ${accSet.has(r.name) ? `<span class="accused-mark">· accused</span>` : ""}
+      return `<div class="rrow">${r.role === "imp" ? avatar(r.name, { disguise: true, size: 40 }) : roleArt(r, 40)}<div class="nm">${esc(r.name)} ${accSet.has(r.name) ? `<span class="accused-mark">· accused</span>` : ""}
         <small>${r.word === null ? "No word" : "Had: " + esc(r.word)}</small>
         ${caught.includes(r) ? `<button class="steal" data-act="steal" data-v="${esc(r.name)}" aria-pressed="${R.stolen.includes(r.name)}">${R.stolen.includes(r.name) ? "Guessed the word · +1" : "Last chance: guessed the word?"}</button>` : ""}
       </div><div style="text-align:right"><span class="tag ${c}">${lab}</span><div class="pts" style="font-family:var(--f-mono);color:${d ? "var(--gold)" : "var(--muted)"};margin-top:4px">${d ? "+" + d : "0"}</div></div></div>`;
@@ -1039,7 +1199,14 @@ app.addEventListener("click", e => {
     case "acc": { const a = S.round.accused; const i = a.indexOf(v); if (i >= 0) a.splice(i, 1); else a.push(v); break; }
     case "accAll": S.round.accused = S.round.roles.map(r => r.name); break;
     case "accNone": S.round.accused = []; break;
-    case "verdict": S.screen = "result"; beep(300, .15, 2); window.scrollTo(0, 0); break;
+    case "verdict": {
+      S.screen = "result"; window.scrollTo(0, 0);
+      const out = computeScores(S.round).outcome;
+      if (out === "win") { setTimeout(() => confetti(["#ffcf33", "#4fe3b5", "#6fb6ff", "#ff5c9a", "#c38bff"]), 350); beep(660, .1, 3); }
+      else if (out === "jest") { setTimeout(() => confetti(["#6fb6ff", "#c38bff", "#ffcf33"]), 350); beep(520, .12, 2); }
+      else beep(300, .15, 2);
+      break;
+    }
     case "steal": { const s = S.round.stolen; const i = s.indexOf(v); if (i >= 0) s.splice(i, 1); else s.push(v); break; }
     case "guide": if (S.screen !== "guide") S.back = S.screen; S.gtopic = v || null; S.screen = "guide"; window.scrollTo(0, 0); break;
     case "topic": S.gtopic = v || null; window.scrollTo(0, 0); break;
