@@ -206,6 +206,13 @@ textarea { min-height: 84px; resize: vertical; font-family: var(--f-mono); font-
 .tile .tl .ic { color: var(--gold); }
 .twist b { display: inline-flex; align-items: center; gap: 6px; }
 .twist b .ic { color: var(--sky); }
+.iconbtn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); color: var(--paper); display: inline-grid; place-items: center; flex: none; padding: 0; }
+.iconbtn[aria-pressed=true][data-act=mute] { color: var(--coral); border-color: var(--coral); }
+.slider { display: grid; grid-template-columns: auto 1fr 3.5em; gap: 10px; align-items: center; font-size: 14px; color: var(--muted); }
+.slider input { width: 100%; accent-color: var(--gold); min-width: 0; }
+.slider input:disabled { opacity: .35; }
+.slider output { font-family: var(--f-mono); font-size: 13px; text-align: right; color: var(--paper); }
+.switch-row b { display: inline-flex; align-items: center; gap: 6px; }
 /* Home tiles & sub-screens */
 .home, .sub { display: flex; flex-direction: column; gap: 16px; }
 .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
@@ -232,7 +239,7 @@ textarea { min-height: 84px; resize: vertical; font-family: var(--f-mono); font-
 .pager { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .pager .btn { font-size: 14px; padding: 12px; min-width: 0; overflow-wrap: anywhere; }
 /* Guide */
-.hdr-right { flex: none; white-space: nowrap; display: flex; align-items: center; gap: 10px; }
+.hdr-right { flex: none; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
 .helpbtn { white-space: nowrap; flex: none; border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 6px 12px; font-weight: 800; font-size: 13px; color: var(--paper); }
 .guide { display: flex; flex-direction: column; gap: 18px; }
 .guide .lede { font-size: 17px; }
@@ -321,7 +328,8 @@ const DEFAULTS = {
   round: null,
   screen: "setup",
   idx: 0,
-  peeked: false
+  peeked: false,
+  music: true, sfx: true, mute: false, musicVol: 60, sfxVol: 80
 };
 const KEY = "imposter-party-v1";
 let S;
@@ -424,7 +432,11 @@ const ICONS = {
   Activities: `<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>`,
   Weird: `<ellipse cx="12" cy="13" rx="9.5" ry="3"/><path d="M7 12a5 5 0 0 1 10 0"/><path d="M8 18.5l-1 2.5M12 17.5v3.5M16 18.5l1 2.5"/>`,
   Tech: `<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18h2"/>`,
-  Custom: `<path d="M4 20l1-4L16 5l3 3L8 19z"/>`
+  Custom: `<path d="M4 20l1-4L16 5l3 3L8 19z"/>`,
+  sound: `<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>`,
+  soundOff: `<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9.5l5 5M22 9.5l-5 5"/>`,
+  music: `<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>`,
+  help: `<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.5v.4"/><path d="M12 16.8v.2"/>`
 };
 function icon(name, size = 18) {
   return `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICONS[name] || ""}</svg>`;
@@ -609,25 +621,118 @@ function applyScores() {
   R.applied = true;
 }
 
-/* ---------- Audio ---------- */
-let actx = null;
-function beep(freq = 660, dur = .18, times = 1) {
+/* ---------- Audio: everything is synthesized live with Web Audio (no sound files) ---------- */
+const AU = { ctx: null, master: null, music: null, fx: null, noise: null, playing: false, step: 0, next: 0, timer: null, intensity: 0 };
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+function ensureAudio() {
+  if (AU.ctx) return AU.ctx;
+  const C = window.AudioContext || window.webkitAudioContext; if (!C) return null;
   try {
-    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-    for (let i = 0; i < times; i++) {
-      const o = actx.createOscillator(), g = actx.createGain();
-      o.frequency.value = freq; o.type = "square";
-      const t = actx.currentTime + i * (dur + .08);
-      g.gain.setValueAtTime(.08, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
-      o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur);
-    }
-  } catch (e) {}
+    const ctx = AU.ctx = new C();
+    AU.master = ctx.createGain(); AU.music = ctx.createGain(); AU.fx = ctx.createGain();
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4;
+    AU.music.connect(comp); AU.fx.connect(comp); comp.connect(AU.master); AU.master.connect(ctx.destination);
+    const buf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    AU.noise = buf; applyVolumes(true);
+    return ctx;
+  } catch (e) { AU.ctx = null; return null; }
 }
+function applyVolumes(now) {
+  if (!AU.ctx) return; const t = AU.ctx.currentTime, k = now ? .001 : .06;
+  AU.master.gain.setTargetAtTime(S.mute ? 0 : 1, t, k);
+  AU.music.gain.setTargetAtTime(S.music ? (S.musicVol / 100) * .55 : 0, t, k);
+  AU.fx.gain.setTargetAtTime(S.sfx ? S.sfxVol / 100 : 0, t, k);
+}
+function tone(f, t, dur, o = {}) {
+  const ctx = AU.ctx, osc = ctx.createOscillator(), g = ctx.createGain();
+  const vol = o.vol ?? .2, at = o.attack ?? .005;
+  osc.type = o.type || "sine"; osc.frequency.setValueAtTime(f, t);
+  if (o.slideTo) osc.frequency.exponentialRampToValueAtTime(o.slideTo, t + dur);
+  if (o.vib) { const l = ctx.createOscillator(), lg = ctx.createGain(); l.frequency.value = o.vib; lg.gain.value = f * .035; l.connect(lg).connect(osc.frequency); l.start(t); l.stop(t + dur + .1); }
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + at); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  osc.connect(g);
+  if (o.filter) { const fl = ctx.createBiquadFilter(); fl.type = "lowpass"; fl.frequency.value = o.filter; g.connect(fl).connect(o.bus || AU.fx); } else g.connect(o.bus || AU.fx);
+  osc.start(t); osc.stop(t + dur + .05);
+}
+function hiss(t, dur, o = {}) {
+  const ctx = AU.ctx, src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+  src.buffer = AU.noise; f.type = o.type || "highpass"; f.frequency.setValueAtTime(o.freq || 6000, t); f.Q.value = o.q || 1;
+  if (o.sweepTo) f.frequency.exponentialRampToValueAtTime(o.sweepTo, t + dur);
+  g.gain.setValueAtTime(o.vol ?? .2, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  src.connect(f).connect(g).connect(o.bus || AU.fx); src.start(t, Math.random() * .5); src.stop(t + dur + .02);
+}
+
+const SFX = {
+  tap:      t => tone(1200, t, .045, { type: "triangle", vol: .12, slideTo: 700 }),
+  toggle:   t => { tone(700, t, .05, { type: "square", vol: .05, filter: 2500 }); tone(1050, t + .05, .07, { type: "square", vol: .05, filter: 2500 }); },
+  deal:     t => { for (let i = 0; i < 7; i++) hiss(t + i * .055, .05, { vol: .25, type: "bandpass", freq: 2400 + i * 300, q: 2 }); tone(mtof(74), t + .42, .25, { type: "triangle", vol: .15 }); tone(mtof(81), t + .5, .4, { type: "triangle", vol: .15 }); },
+  peek:     t => { hiss(t, .22, { vol: .16, type: "bandpass", freq: 600, q: 1.5, sweepTo: 3500 }); tone(mtof(88), t + .12, .45, { vol: .09 }); tone(mtof(95), t + .17, .45, { vol: .05 }); },
+  pass:     t => { tone(mtof(67), t, .12, { vol: .2, slideTo: mtof(72) }); tone(mtof(79), t + .1, .2, { vol: .17 }); },
+  skip:     t => { for (let i = 0; i < 5; i++) hiss(t + i * .04, .035, { vol: .2, type: "bandpass", freq: 3000, q: 3 }); tone(mtof(76), t + .22, .16, { type: "triangle", vol: .15, slideTo: mtof(83) }); },
+  tick:     t => { tone(1800, t, .03, { type: "square", vol: .05, filter: 3000 }); hiss(t, .02, { vol: .08, freq: 5000 }); },
+  alarm:    t => { for (let i = 0; i < 3; i++) { tone(880, t + i * .24, .16, { type: "square", vol: .11, filter: 3000 }); tone(660, t + i * .24 + .08, .1, { type: "square", vol: .08, filter: 3000 }); } },
+  accuse:   t => { tone(mtof(50), t, .1, { type: "sawtooth", vol: .1, filter: 1400 }); tone(mtof(45), t + .09, .2, { type: "sawtooth", vol: .1, filter: 1200 }); },
+  unaccuse: t => tone(mtof(69), t, .08, { type: "triangle", vol: .12, slideTo: mtof(76) }),
+  drumroll: t => { for (let i = 0; i < 16; i++) hiss(t + i * .033, .05, { vol: .06 + i * .012, type: "bandpass", freq: 900, q: .8 }); tone(70, t + .55, .45, { vol: .45, slideTo: 40 }); hiss(t + .55, .5, { vol: .15, freq: 6000 }); },
+  win:      t => { [60, 64, 67, 72].forEach((m, i) => { tone(mtof(m), t + i * .1, .3, { type: "triangle", vol: .2 }); tone(mtof(m + 12), t + i * .1, .2, { type: "square", vol: .035, filter: 3000 }); }); [72, 76, 79, 84].forEach(m => tone(mtof(m), t + .45, 1, { type: "triangle", vol: .11 })); hiss(t + .45, .7, { vol: .1, freq: 7000 }); },
+  lose:     t => { [[51, 0], [50, .32], [49, .64]].forEach(([m, d]) => tone(mtof(m), t + d, .3, { type: "sawtooth", vol: .13, filter: 900 })); tone(mtof(48), t + .96, 1.2, { type: "sawtooth", vol: .14, filter: 800, vib: 6 }); },
+  jester:   t => { for (let i = 0; i < 8; i++) tone(mtof(i % 2 ? 79 : 84), t + i * .08, .08, { type: "square", vol: .06, filter: 2600 }); tone(mtof(88), t + .7, .3, { type: "triangle", vol: .12, slideTo: mtof(96) }); },
+  unmask:   t => { hiss(t, .05, { vol: .3, type: "bandpass", freq: 1500, q: 2 }); tone(1400, t + .04, .7, { vol: .12, slideTo: 260 }); },
+  steal:    t => { tone(mtof(76), t, .1, { type: "triangle", vol: .15 }); tone(mtof(83), t + .08, .3, { type: "triangle", vol: .15 }); },
+  page:     t => hiss(t, .09, { vol: .12, type: "bandpass", freq: 1800, q: 1, sweepTo: 900 }),
+  nope:     t => tone(160, t, .18, { type: "square", vol: .07, filter: 900 })
+};
+function sfx(name, delay = 0) {
+  if (S.mute || !S.sfx || !SFX[name]) return;
+  const ctx = ensureAudio(); if (!ctx) return;
+  if (ctx.state === "suspended") ctx.resume();
+  try { SFX[name](ctx.currentTime + .01 + delay); } catch (e) {}
+}
+
+/* Background music: an original sneaky "tiptoe" loop in D minor. 4 phrases x 32 eighth notes. */
+const BASS = [38,0,38,0,41,0,45,0, 43,0,43,0,46,0,50,0, 45,0,45,0,48,0,52,0, 45,0,43,0,41,0,40,0];
+const LEAD_A = [62,0,65,0,69,0,68,69, 0,0,67,0,65,0,0,0, 64,0,67,0,72,0,71,72, 0,0,69,0,0,0,0,0];
+const LEAD_B = [74,0,72,0,70,0,69,0, 67,0,0,70,69,0,67,0, 69,0,0,0,64,0,65,0, 67,0,0,0,69,0,0,0];
+function musicStep(i, t, len) {
+  const k = i % 32, phrase = Math.floor(i / 32) % 4, tense = AU.intensity > 0, bus = AU.music;
+  const b = BASS[k];
+  if (b) tone(mtof(b), t, len * .85, { type: "triangle", vol: .32, bus, filter: 900, attack: .004 });
+  const lead = (phrase % 2 ? LEAD_B : LEAD_A)[k];
+  if (lead && phrase !== 0) tone(mtof(lead + (phrase === 3 ? 12 : 0)), t, len * 1.5, { type: "square", vol: .05, bus, filter: tense ? 3200 : 2000, attack: .003 });
+  if (lead && phrase === 0 && k % 4 === 0) tone(mtof(lead), t, len * 3, { type: "sine", vol: .06, bus });
+  hiss(t, .03, { vol: k % 2 ? .035 : .018, freq: 8000, bus });
+  if (k % 8 === 0) tone(mtof(b ? b + 24 : 62), t, len * 6, { type: "sine", vol: .03, bus });
+  if (tense) {
+    if (k % 4 === 0) tone(110, t, .16, { vol: .45, slideTo: 42, bus });
+    if (k % 4 === 2) hiss(t, .06, { vol: .08, type: "bandpass", freq: 2200, q: .7, bus });
+    if (k % 2 === 1) hiss(t, .04, { vol: .05, freq: 9000, bus });
+  }
+}
+function musicSchedule() {
+  const ctx = AU.ctx; if (!ctx || !AU.playing) return;
+  const len = 60 / (AU.intensity ? 128 : 108) / 2;
+  while (AU.next < ctx.currentTime + .15) { try { musicStep(AU.step, AU.next, len); } catch (e) {} AU.next += len; AU.step = (AU.step + 1) % 128; }
+}
+function musicStart() {
+  if (!S.music || S.mute || AU.playing) return;
+  const ctx = ensureAudio(); if (!ctx) return;
+  if (ctx.state === "suspended") ctx.resume();
+  AU.playing = true; AU.next = ctx.currentTime + .1; AU.timer = setInterval(musicSchedule, 30);
+}
+function musicStop() { AU.playing = false; clearInterval(AU.timer); AU.timer = null; }
+try { window.__imposterAudioStop && window.__imposterAudioStop(); } catch (e) {}
+window.__imposterAudioStop = () => { musicStop(); try { AU.ctx && AU.ctx.close(); } catch (e) {} };
+function unlockAudio() { if (ensureAudio()) { if (AU.ctx.state === "suspended") AU.ctx.resume(); musicStart(); } }
+document.addEventListener("pointerdown", unlockAudio, { once: true });
+document.addEventListener("keydown", unlockAudio, { once: true });
+document.addEventListener("visibilitychange", () => { if (!AU.ctx) return; if (document.hidden) AU.ctx.suspend(); else if (!S.mute) AU.ctx.resume(); });
 
 /* ---------- Screens ---------- */
 function header() {
   const r = S.round && ["pass", "discuss", "vote", "result"].includes(S.screen) ? `Round ${S.round.no}` : "";
-  const btn = S.screen === "guide" ? "" : `<button class="helpbtn" data-act="guide" aria-label="Open the user guide">? Guide</button>`;
+  const btn = `<button class="iconbtn" data-act="mute" aria-pressed="${S.mute}" aria-label="${S.mute ? "Turn sound on" : "Mute all sound"}" title="${S.mute ? "Sound off" : "Sound on"}">${icon(S.mute ? "soundOff" : "sound", 18)}</button>`
+    + (S.screen === "guide" ? "" : `<button class="iconbtn" data-act="guide" aria-label="Open the user guide" title="How to play">${icon("help", 18)}</button>`);
   return `<header class="top"><h1 class="logo">${icon("mask", 24)}<span>IMPOSTER<span>.</span>PARTY</span></h1><div class="hdr-right">${S.screen === "guide" ? "" : r ? `<span class="round-tag">${r}</span>` : ""}${btn}</div></header>`;
 }
 
@@ -638,7 +743,8 @@ const SUBS = {
   twists:    { title: "Twists & rules", act: "Secret surprises and silly clue rules." },
   words:     { title: "Words", act: "Pick the categories the secret word comes from." },
   timer:     { title: "Timer", act: "How long the group gets to give clues and argue." },
-  scores:    { title: "Scores", act: "Running totals across rounds." }
+  scores:    { title: "Scores", act: "Running totals across rounds." },
+  sound:     { title: "Sound", act: "Background music and sound effects." }
 };
 function sortedScores() { return Object.entries(S.scores).filter(([k]) => S.players.includes(k)).sort((a, b) => b[1] - a[1]); }
 function canDeal() { return S.players.length >= 3 && (S.cats.length || customPairs().length); }
@@ -666,9 +772,10 @@ function setupView() {
       ${tile("words", "Words", S.cats.length + (cust ? "+" : ""), S.cats.length || cust ? (S.cats.length + " categories" + (cust ? ", " + cust + " custom" : "")) : "Pick a category", !S.cats.length && !cust)}
       ${tile("timer", "Timer", S.timer ? S.timer / 60 + " min" : "Off", "Clue discussion")}
       ${tile("scores", "Scores", top ? esc(top[0]) : "–", top ? top[1] + " pts · leading" : "No rounds yet")}
+      ${tile("sound", "Sound", S.mute ? "Muted" : S.music ? "Music on" : "Music off", S.sfx ? "Effects on" : "Effects off")}
+      <button class="tile" data-act="guide"><span class="tl">${icon("guide", 15)}Guide</span><span class="tv">How to</span><span class="tn">play · rules · tips</span><span class="chev" aria-hidden="true">›</span></button>
     </div>
     <button class="btn big" data-act="start" ${canDeal() ? "" : "disabled"}>Deal the cards</button>
-    <button class="btn ghost" data-act="guide">New here? How to play</button>
   </div>`;
 }
 
@@ -721,6 +828,18 @@ function settingsView() {
     <label for="custom"><b>Your own words</b></label>
     <p class="small muted">One per line: <code>word, decoy</code>. The decoy is used by Undercover and Split Room.</p>
     <textarea id="custom" placeholder="Grandma's lasagna, Grandpa's meatloaf">${esc(S.custom)}</textarea>`;
+  if (sub === "sound") body = `
+    <div class="switch-row">
+      <div><b>${icon("music", 16)} Background music</b><p class="small muted">A sneaky loop that speeds up during clue time.</p></div>
+      <button class="switch" data-act="music" aria-pressed="${S.music}" aria-label="Background music"></button>
+    </div>
+    <label class="slider" for="musicVol"><span>Music volume</span><input type="range" id="musicVol" min="0" max="100" step="5" value="${S.musicVol}" ${S.music ? "" : "disabled"}><output>${S.musicVol}%</output></label>
+    <div class="switch-row">
+      <div><b>${icon("sound", 16)} Sound effects</b><p class="small muted">Card shuffles, peeks, votes, drumrolls and fanfares.</p></div>
+      <button class="switch" data-act="sfx" aria-pressed="${S.sfx}" aria-label="Sound effects"></button>
+    </div>
+    <label class="slider" for="sfxVol"><span>Effects volume</span><input type="range" id="sfxVol" min="0" max="100" step="5" value="${S.sfxVol}" ${S.sfx ? "" : "disabled"}><output>${S.sfxVol}%</output></label>
+    ${S.mute ? `<p class="small" style="color:var(--coral)">All sound is muted. Tap the speaker button at the top to turn it back on.</p>` : `<p class="small muted">The speaker button at the top mutes everything at once. Phones only play sound after the first tap, and silent mode may block it.</p>`}`;
   if (sub === "timer") body = `
     <div class="seg" role="group" aria-label="Timer length" style="grid-template-columns:repeat(4,1fr)">
       ${TIMERS.map(([v, l]) => `<button data-act="timer" data-v="${v}" aria-pressed="${S.timer === v}">${l}</button>`).join("")}
@@ -984,6 +1103,8 @@ function guideAllHTML() {
       <p>On the Words screen, use the <b>Your own words</b> box and type one pair per line as <code>word, decoy</code>. For example: <code>Grandma's lasagna, Grandpa's meatloaf</code>. Custom words appear under the category "Custom". Always add a decoy: without one, the Undercover and Split Room twists use the same word twice.</p>
       <h4>Discussion timer</h4>
       <p>On the Timer screen, choose Off, 2, 3 or 5 minutes. On supported phones it also vibrates when time runs out.</p>
+      <h4>Sound (Sound tile)</h4>
+      <p>Turn the background music and sound effects on or off separately, and set each volume. The speaker button at the top of every screen mutes everything at once. The music speeds up and adds a heartbeat drum during clue time.</p>
       <h4>Saving</h4>
       <p>Players, settings and scores are saved in this browser on this device. They aren't shared with other phones.</p>
     </section>
@@ -1110,7 +1231,7 @@ function guideAllHTML() {
       <h4>I can't add a player.</h4>
       <p>Names must be unique and there's a limit of 20 players.</p>
       <h4>There's no sound.</h4>
-      <p>Phones only play sound after you've tapped the page, and silent mode may mute it. The timer still counts down on screen.</p>
+      <p>Check the speaker button at the top isn't muted (it turns red when muted), and that music and effects are on in the <b>Sound</b> tile. Phones only play sound after you've tapped the page, and silent mode may mute it. The timer still counts down on screen.</p>
       <h4>My scores disappeared.</h4>
       <p>Scores are saved in this browser only. Private browsing, clearing site data, or switching phones starts fresh.</p>
       <h4>Can the starting player be an imposter?</h4>
@@ -1127,12 +1248,13 @@ function render() {
   const views = { guide: guideView, settings: settingsView, setup: setupView, pass: passView, discuss: discussView, vote: voteView, result: resultView };
   app.innerHTML = (views[S.screen] || setupView)();
   if (S.screen === "pass") bindCard();
+  AU.intensity = S.screen === "discuss" ? 1 : 0;
   save();
 }
 
 function bindCard() {
   const card = $("#card"); if (!card) return;
-  const show = e => { e.preventDefault(); card.classList.add("peek"); if (!S.peeked) { S.peeked = true; document.querySelectorAll('[data-act="next"],[data-act="skip"]').forEach(b => b.disabled = false); } };
+  const show = e => { e.preventDefault(); if (!card.classList.contains("peek")) sfx("peek"); card.classList.add("peek"); if (!S.peeked) { S.peeked = true; document.querySelectorAll('[data-act="next"],[data-act="skip"]').forEach(b => b.disabled = false); } };
   const hide = () => card.classList.remove("peek");
   card.addEventListener("pointerdown", show);
   card.addEventListener("pointerup", hide);
@@ -1150,8 +1272,8 @@ function startTimer() {
     timerLeft = Math.max(0, timerLeft - 1);
     const el = $("#timer");
     if (el) { el.textContent = fmt(timerLeft); el.classList.toggle("low", timerLeft <= 15); }
-    if (timerLeft <= 10 && timerLeft > 0) beep(880, .06);
-    if (timerLeft === 0) { stopTimer(); beep(440, .35, 3); if (navigator.vibrate) try { navigator.vibrate([200, 100, 200]); } catch (e) {} render(); }
+    if (timerLeft <= 10 && timerLeft > 0) sfx("tick");
+    if (timerLeft === 0) { stopTimer(); sfx("alarm"); if (navigator.vibrate) try { navigator.vibrate([200, 100, 200]); } catch (e) {} render(); }
   }, 1000);
 }
 function stopTimer() { clearInterval(timerId); timerId = null; timerRunning = false; }
@@ -1160,18 +1282,33 @@ app.addEventListener("submit", e => {
   e.preventDefault();
   const inp = $("#newName"); const v = inp.value.trim().slice(0, 18);
   if (!v) return;
-  if (S.players.some(p => p.toLowerCase() === v.toLowerCase())) { inp.classList.add("shake"); setTimeout(() => inp.classList.remove("shake"), 500); return; }
+  if (S.players.some(p => p.toLowerCase() === v.toLowerCase())) { sfx("nope"); inp.classList.add("shake"); setTimeout(() => inp.classList.remove("shake"), 500); return; }
   if (S.players.length >= 20) return;
-  S.players.push(v); render(); $("#newName").focus();
+  S.players.push(v); sfx("pass"); render(); $("#newName").focus();
 });
-app.addEventListener("input", e => { if (e.target.id === "custom") { S.custom = e.target.value; save(); } });
-app.addEventListener("change", e => { if (e.target.id === "custom") render(); });
+app.addEventListener("input", e => {
+  const id = e.target.id;
+  if (id === "custom") { S.custom = e.target.value; save(); }
+  if (id === "musicVol" || id === "sfxVol") {
+    S[id] = +e.target.value; applyVolumes();
+    const out = e.target.parentNode.querySelector("output"); if (out) out.textContent = S[id] + "%";
+    save();
+  }
+});
+app.addEventListener("change", e => { if (e.target.id === "custom") render(); if (e.target.id === "sfxVol") sfx("pass"); });
 
 app.addEventListener("click", e => {
   const b = e.target.closest("[data-act]"); if (!b || b.disabled) return;
   const act = b.dataset.act, v = b.dataset.v;
   if (act !== "reset") resetArmed = false;
+  const ACT_SFX = { start: "deal", again: "deal", next: "pass", accAll: "accuse", accNone: "unaccuse", steal: "steal", guide: "page", topic: "page", unguide: "page",
+    sub: "tap", home: "tap", tosetup: "tap", mode: "toggle", hint: "toggle", twistOn: "toggle", tw: "toggle", rules: "toggle", cat: "toggle", timer: "toggle",
+    cnt: "tap", rm: "tap", up: "tap", tgl: "tap", treset: "tap", repeek: "tap", tovote: "accuse", reset: "tap", music: "toggle", sfx: "toggle" };
+  if (ACT_SFX[act]) sfx(ACT_SFX[act]);
   switch (act) {
+    case "mute": S.mute = !S.mute; if (!S.mute) { unlockAudio(); applyVolumes(); musicStart(); sfx("toggle"); } else applyVolumes(); break;
+    case "music": S.music = !S.music; applyVolumes(); if (S.music) musicStart(); else musicStop(); break;
+    case "sfx": S.sfx = !S.sfx; applyVolumes(); if (S.sfx) sfx("toggle"); break;
     case "rm": S.players.splice(+b.dataset.i, 1); break;
     case "mode": S.mode = v; break;
     case "cnt": S.count = Math.max(0, Math.min(S.players.length - 1, S.count + +v)); break;
@@ -1184,8 +1321,8 @@ app.addEventListener("click", e => {
     case "reset": if (resetArmed) { S.scores = {}; S.roundNo = 0; resetArmed = false; } else resetArmed = true; break;
     case "start": case "again":
       if (act === "again") applyScores();
-      newRound(); beep(520, .08); window.scrollTo(0, 0); break;
-    case "skip": if (S.idx === 0 && !S.round.locked) { skipWord(); beep(700, .06); } break;
+      newRound(); window.scrollTo(0, 0); break;
+    case "skip": if (S.idx === 0 && !S.round.locked) { skipWord(); sfx("skip"); } break;
     case "next":
       S.round.locked = true;
       S.peeked = false;
@@ -1196,15 +1333,18 @@ app.addEventListener("click", e => {
     case "treset": stopTimer(); timerLeft = S.timer; break;
     case "repeek": stopTimer(); S.idx = 0; S.peeked = false; S.screen = "pass"; break;
     case "tovote": stopTimer(); S.screen = "vote"; window.scrollTo(0, 0); break;
-    case "acc": { const a = S.round.accused; const i = a.indexOf(v); if (i >= 0) a.splice(i, 1); else a.push(v); break; }
+    case "acc": { const a = S.round.accused; const i = a.indexOf(v); if (i >= 0) { a.splice(i, 1); sfx("unaccuse"); } else { a.push(v); sfx("accuse"); } break; }
     case "accAll": S.round.accused = S.round.roles.map(r => r.name); break;
     case "accNone": S.round.accused = []; break;
     case "verdict": {
       S.screen = "result"; window.scrollTo(0, 0);
       const out = computeScores(S.round).outcome;
-      if (out === "win") { setTimeout(() => confetti(["#ffcf33", "#4fe3b5", "#6fb6ff", "#ff5c9a", "#c38bff"]), 350); beep(660, .1, 3); }
-      else if (out === "jest") { setTimeout(() => confetti(["#6fb6ff", "#c38bff", "#ffcf33"]), 350); beep(520, .12, 2); }
-      else beep(300, .15, 2);
+      const unmasked = S.round.roles.some(r => r.role === "imp" && r.word === null && S.round.accused.includes(r.name)) && S.round.roles.some(r => r.role !== "imp");
+      sfx("drumroll");
+      if (unmasked) sfx("unmask", .55);
+      if (out === "win") { setTimeout(() => confetti(["#ffcf33", "#4fe3b5", "#6fb6ff", "#ff5c9a", "#c38bff"]), 650); sfx("win", .65); }
+      else if (out === "jest") { setTimeout(() => confetti(["#6fb6ff", "#c38bff", "#ffcf33"]), 650); sfx("jester", .65); }
+      else sfx("lose", .65);
       break;
     }
     case "steal": { const s = S.round.stolen; const i = s.indexOf(v); if (i >= 0) s.splice(i, 1); else s.push(v); break; }
