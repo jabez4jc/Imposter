@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<defs><radialGradient id="bg" cx="50%" cy="22%" r="85%"><stop offset="0" stop-color="#4a2a80"/><stop offset="1" stop-color="#1a0f2e"/></radialGradient></defs>
+<rect width="512" height="512" fill="url(#bg)"/>
+<g transform="translate(115.2 104.2) scale(4.4)"><ellipse cx="32" cy="61" rx="20" ry="2.6" fill="#000" opacity=".28"/>
+<path d="M10 60 C10 26 18 8 32 8 C46 8 54 26 54 60 Q43 56.5 32 60 Q21 56.5 10 60Z" fill="#ff7a59" stroke="#1a0f2e" stroke-width="2"/>
+<path d="M16.5 32 C17 20 22.5 13.5 29 12" stroke="#fff" stroke-opacity=".38" stroke-width="3" fill="none" stroke-linecap="round"/>
+<circle cx="24" cy="30" r="6.5" fill="#fff"/><circle cx="40" cy="30" r="6.5" fill="#fff"/>
+<circle cx="22.4" cy="31" r="3.2" fill="#1a0f2e"/><circle cx="38.4" cy="31" r="3.2" fill="#1a0f2e"/>
+<circle cx="16.5" cy="40" r="3.2" fill="#ff5c7a" opacity=".35"/><circle cx="47.5" cy="40" r="3.2" fill="#ff5c7a" opacity=".35"/>
+<path d="M17 20.5 Q24 16.5 30 20.5 M34 20.5 Q40 16.5 47 20.5" stroke="#1a0f2e" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+<circle cx="24" cy="30" r="8.2" fill="rgba(255,255,255,.15)" stroke="#1a0f2e" stroke-width="3"/>
+<circle cx="40" cy="30" r="8.2" fill="rgba(255,255,255,.15)" stroke="#1a0f2e" stroke-width="3"/>
+<path d="M30.5 29 Q32 27 33.5 29 M15.8 28 L10 25.5 M48.2 28 L54 25.5" stroke="#1a0f2e" stroke-width="3" fill="none" stroke-linecap="round"/>
+<ellipse cx="32" cy="38" rx="4.6" ry="5.6" fill="#f2a58e" stroke="#1a0f2e" stroke-width="1.6"/>
+<path d="M19 46 C23 40 28.5 41 32 43.5 C35.5 41 41 40 45 46 C41 44.5 36.5 46.5 32 45.5 C27.5 46.5 23 44.5 19 46Z" fill="#1a0f2e"/></g>
+</svg>
