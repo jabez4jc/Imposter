@@ -1,7 +1,7 @@
 /* Imposter Party service worker.
    build.sh writes this file to /service-worker.js and stamps CACHE_VERSION with a hash of the build,
    so every new release installs a fresh cache and old ones are deleted. */
-const CACHE_VERSION = "7ca992664881";
+const CACHE_VERSION = "58ed1a01d3fe";
 const CACHE = `imposter-${CACHE_VERSION}`;
 const RUNTIME = "imposter-runtime";
 

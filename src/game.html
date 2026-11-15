@@ -23,7 +23,7 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
-html, body { min-height: 100%; }
+html, body { height: 100%; margin: 0; }
 body {
   background: var(--stage);
   background-image: radial-gradient(1200px 500px at 50% -200px, #3a2266 0%, transparent 70%);
@@ -33,16 +33,35 @@ body {
   line-height: 1.5;
 }
 .wrap {
+  /* App shell: header on top, the screen's content scrolls in the middle, its buttons stay pinned in the dock below. */
   max-width: 560px; margin: 0 auto;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 20px 48px;
-  display: flex; flex-direction: column; gap: 18px;
+  height: 100vh; height: 100dvh;
+  display: flex; flex-direction: column; overflow: hidden;
+  padding-top: max(10px, env(safe-area-inset-top, 0px));
 }
-header.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+.wrap > header.top { flex: none; padding: 0 max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px)); }
+.scroll {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  padding: 6px max(16px, env(safe-area-inset-right, 0px)) 16px max(16px, env(safe-area-inset-left, 0px));
+  display: flex; flex-direction: column; gap: 16px;
+}
+.dock {
+  flex: none; display: flex; flex-direction: column; gap: 8px;
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  border-top: 1px solid var(--line); background: linear-gradient(to bottom, #20143a, var(--stage));
+  box-shadow: 0 -10px 20px rgba(10, 4, 24, .45);
+}
+.dock .btn.ghost { padding: 10px 14px; font-size: 15px; }
+.dock .note { font-size: 13px; color: var(--muted); text-align: center; margin: 0; }
+.dock .linkish { align-self: center; padding: 2px 0; font-size: 14px; }
+.dock .row > .btn { flex: 1 1 0; min-width: 0; }
+.tbar { display: flex; align-items: center; gap: 10px; }
+.tbar .timer { font-size: 40px; flex: none; min-width: 3.2ch; text-align: left; }
+.tbar .btn { flex: 1 1 0; min-width: 0; padding: 10px 12px; }
+header.top { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
 header.top .hdr-right { margin-left: auto; }
 @media (max-width: 430px) { header.top .round-tag { display: none; } }
-.logo { font-family: var(--f-display); font-size: clamp(17px, 5.2vw, 24px); white-space: nowrap; letter-spacing: .5px; line-height: 1; margin: 0; }
+.logo { min-width: 0; font-family: var(--f-display); font-size: clamp(14px, 4.6vw, 24px); white-space: nowrap; letter-spacing: .5px; line-height: 1; margin: 0; }
 .logo > span > span { color: var(--gold); }
 .round-tag { font-family: var(--f-mono); font-size: 12px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
 h2 { font-family: var(--f-display); font-weight: 400; font-size: 22px; margin: 0; text-wrap: balance; line-height: 1.15; }
@@ -112,18 +131,18 @@ textarea { min-height: 84px; resize: vertical; font-family: var(--f-mono); font-
 .score .delta { font-family: var(--f-mono); font-size: 13px; color: var(--mint); margin-left: 6px; }
 
 /* Pass & reveal */
-.pass { text-align: center; display: flex; flex-direction: column; gap: 18px; align-items: center; padding-top: 16px; }
-.pass .who { font-family: var(--f-display); font-size: clamp(34px, 10vw, 54px); line-height: 1.05; color: var(--gold); word-break: break-word; }
+.scroll.pass { text-align: center; gap: 10px; align-items: center; }
+.pass .who { font-family: var(--f-display); font-size: clamp(28px, min(10vw, 7dvh), 54px); line-height: 1.05; color: var(--gold); word-break: break-word; }
 .progress { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
 .progress i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
 .progress i.done { background: var(--mint); }
 .progress i.now { background: var(--gold); }
 .card {
-  width: 100%; max-width: 380px; aspect-ratio: 3 / 4; border-radius: 22px; position: relative;
+  width: 100%; max-width: 380px; flex: 1 1 0; min-height: 180px; max-height: 500px; border-radius: 22px; position: relative;
   user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none;
   border: 2px solid var(--line); overflow: hidden;
 }
-.card .face { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 22px; text-align: center; }
+.card .face { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(4px, 1.4dvh, 12px); padding: clamp(12px, 2.5dvh, 22px); text-align: center; overflow: hidden; }
 .card .cover {
   background:
     repeating-linear-gradient(45deg, transparent 0 14px, rgba(255,207,51,.07) 14px 28px),
@@ -135,7 +154,7 @@ textarea { min-height: 84px; resize: vertical; font-family: var(--f-mono); font-
 .card.peek .inner { opacity: 1; }
 .card.peek .cover { opacity: 0; }
 .inner .label { font-family: var(--f-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
-.inner .word { font-family: var(--f-display); font-size: clamp(30px, 9vw, 46px); line-height: 1.05; word-break: break-word; }
+.inner .word { font-family: var(--f-display); font-size: clamp(26px, min(9vw, 6dvh), 46px); line-height: 1.05; word-break: break-word; }
 .inner.imp { background: #3d1430; }
 .inner.imp .word { color: var(--coral); }
 .inner.special .word { color: var(--sky); }
@@ -151,8 +170,8 @@ textarea { min-height: 84px; resize: vertical; font-family: var(--f-mono); font-
 .callout { border-left: 4px solid var(--sky); padding: 4px 0 4px 12px; font-size: 15px; }
 
 /* Vote */
-.vote-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
-.vote-grid button { border: 2px solid var(--line); background: var(--panel); border-radius: 12px; padding: 12px 10px; font-weight: 800; font-size: 16px; word-break: break-word; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.vote-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.vote-grid button { border: 2px solid var(--line); background: var(--panel); border-radius: 12px; padding: 8px 6px; font-weight: 800; font-size: 16px; word-break: break-word; display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .vote-grid button[aria-pressed=true] .av { filter: drop-shadow(0 0 6px rgba(255,92,122,.7)); transform: rotate(-6deg); }
 .vote-grid button[aria-pressed=true] { border-color: var(--coral); background: #3d1430; color: var(--coral); }
 
@@ -181,7 +200,7 @@ textarea { min-height: 84px; resize: vertical; font-family: var(--f-mono); font-
 .av { flex: none; display: block; overflow: visible; }
 .logo { display: inline-flex; align-items: center; gap: 6px; }
 .logo .ic { color: var(--gold); }
-.hero { width: 100%; height: auto; max-height: 132px; display: block; overflow: visible; }
+.hero { width: 100%; height: auto; max-height: min(132px, 15dvh); display: block; overflow: visible; }
 .bob { animation: bob 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
 @keyframes bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-4px) } }
 .bubble { animation: pop 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: 0% 100%; }
@@ -191,8 +210,8 @@ textarea { min-height: 84px; resize: vertical; font-family: var(--f-mono); font-
 .unmask .disguise { animation: unmask 1s cubic-bezier(.5,0,.75,0) .5s both; transform-box: fill-box; transform-origin: 50% 0; }
 @keyframes unmask { to { transform: translate(14px, 46px) rotate(38deg); opacity: 0; } }
 .confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
-.card .art { width: min(118px, 30vw); height: auto; }
-.card .cover .art { width: min(132px, 34vw); }
+.card .art { width: min(118px, 30vw, 13dvh); height: auto; }
+.card .cover .art { width: min(132px, 34vw, 15dvh); }
 .lineup { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; }
 .lineup figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; font-weight: 800; font-size: 14px; max-width: 90px; text-align: center; overflow-wrap: anywhere; }
 .tile .tl { display: inline-flex; align-items: center; gap: 6px; }
@@ -216,6 +235,8 @@ textarea { min-height: 84px; resize: vertical; font-family: var(--f-mono); font-
 .tile .tv { font-family: var(--f-display); font-size: 24px; line-height: 1.15; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tile .tn { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chev { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 22px; color: var(--muted); }
+.titlebar { display: flex; align-items: center; gap: 4px; }
+.titlebar .back { font-size: 30px; line-height: 1; padding: 0 8px 4px 0; margin-left: -2px; }
 .back { align-self: flex-start; border: 0; background: transparent; color: var(--gold); font-weight: 800; font-size: 16px; padding: 6px 0; }
 .plist { display: flex; flex-direction: column; gap: 6px; }
 .prow { display: grid; grid-template-columns: 32px 1fr auto auto; gap: 8px; align-items: center; background: var(--stage); border: 1px solid var(--line); border-radius: 10px; padding: 6px 6px 6px 10px; }
@@ -255,6 +276,57 @@ textarea { min-height: 84px; resize: vertical; font-family: var(--f-mono); font-
 @media (max-width: 380px) { .toc { grid-template-columns: 1fr; } }
 .rules-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
 details summary { cursor: pointer; font-weight: 800; }
+/* Short phones: tighten everything so the dock and the content both fit */
+@media (max-height: 700px) {
+  .btn.big { font-size: 18px; padding: 12px 16px; }
+  .tile { padding: 9px 26px 9px 12px; }
+  .tile .tv { font-size: 20px; }
+  .tiles { gap: 8px; }
+  .scroll { gap: 12px; }
+  .box { padding: 12px; gap: 10px; }
+}
+/* Category toggles: a dense 3-column grid so all 31 fit on (or nearly on) one screen */
+.cats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+.cats .tog { display: flex; align-items: center; gap: 5px; min-height: 34px; padding: 4px 7px; border-radius: 9px; font-size: 12.5px; line-height: 1.15; text-align: left; min-width: 0; }
+.cats .tog .ic { flex: none; }
+.cats .tog .nm { flex: 1; min-width: 0; hyphens: manual; }
+.cats .tog .cnt { display: none; }
+@media (min-width: 400px) { .cats .tog { font-size: 13.5px; } }
+@media (max-width: 399px) and (max-height: 760px) {
+  .cats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+  .cats .tog { justify-content: center; text-align: center; padding: 3px 4px; font-size: 12px; min-height: 34px; }
+  .cats .tog .ic { display: none; }
+  .words-box { padding: 10px; }
+}
+@media (max-height: 600px) { .cats .tog { min-height: 30px; } .words-box { padding: 8px; gap: 8px; } .scroll { padding-top: 2px; gap: 8px; } }
+@media (max-width: 350px) { .logo .ic { display: none; } .cats .tog { font-size: 11.5px; } }
+/* Big groups (13+): three compact columns so the whole vote fits */
+.vote-grid.lots { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.vote-grid.lots button { flex-direction: row; justify-content: flex-start; gap: 4px; padding: 5px; font-size: 13px; text-align: left; overflow-wrap: anywhere; }
+/* Guide menu and twist toggles are compact grids so the whole set fits on one screen */
+.gmenu { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.gmenu button { grid-template-columns: 24px 1fr; gap: 8px; padding: 9px 8px; }
+.gmenu .gnum { width: 24px; height: 24px; font-size: 11px; }
+.gmenu .gt b { font-size: 14px; line-height: 1.2; }
+.gmenu .gt span, .gmenu .chev { display: none; }
+.twists { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.twist { grid-template-columns: auto 1fr; padding: 8px; gap: 2px 8px; align-items: center; }
+.twist .tick { grid-row: auto; width: 20px; height: 20px; margin: 0; }
+.twist span.d { display: none; }
+.twist b { font-size: 14px; }
+@media (max-height: 760px) {
+  .home h2, .sub .section p.muted, .vote-intro { display: none; }
+  .hero { max-height: 64px; }
+  .vote-grid.many { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .vote-grid.many button { flex-direction: row; justify-content: flex-start; padding: 6px 8px; font-size: 15px; text-align: left; }
+  .vote-grid.lots { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .vote-grid.lots button { padding: 4px 5px; font-size: 13px; }
+}
+@media (max-height: 580px) {
+  .home .section { display: none; }
+  .dock { gap: 6px; padding-top: 8px; }
+  .tbar .timer { font-size: 32px; }
+}
 </style>
 
 <div class="wrap" id="app"></div>
@@ -882,6 +954,10 @@ document.addEventListener("keydown", unlockAudio, { once: true });
 document.addEventListener("visibilitychange", () => { if (!AU.ctx) return; if (document.hidden) AU.ctx.suspend(); else if (!S.mute) AU.ctx.resume(); });
 
 /* ---------- Screens ---------- */
+/* Every screen = header + scrolling content + a dock of buttons that never scrolls away. */
+function screen(body, dock, cls = "") {
+  return `${header()}<main class="scroll fade-in ${cls}">${body}</main>${dock ? `<div class="dock">${dock}</div>` : ""}`;
+}
 function header() {
   const r = S.round && ["pass", "discuss", "vote", "result"].includes(S.screen) ? `Round ${S.round.no}` : "";
   const btn = `<button class="iconbtn" data-act="mute" aria-pressed="${S.mute}" aria-label="${S.mute ? "Turn sound on" : "Mute all sound"}" title="${S.mute ? "Sound off" : "Sound on"}">${icon(S.mute ? "soundOff" : "sound", 18)}</button>`
@@ -895,6 +971,7 @@ const SUBS = {
   imposters: { title: "Imposters", act: "How many liars, and how sure can anyone be?" },
   twists:    { title: "Twists & rules", act: "Secret surprises and silly clue rules." },
   words:     { title: "Words", act: "Pick the categories the secret word comes from." },
+  custom:    { title: "Your own words", act: "Inside jokes, names, anything. They mix in with the categories.", back: "words" },
   timer:     { title: "Timer", act: "How long the group gets to give clues and argue." },
   scores:    { title: "Scores", act: "Running totals across rounds." },
   sound:     { title: "Sound", act: "Background music and sound effects." }
@@ -912,8 +989,8 @@ function setupView() {
     <button class="tile${warn ? " warn" : ""}" data-act="sub" data-v="${sub}">
       <span class="tl">${icon(sub === "imposters" ? "mask" : sub, 15)}${label}</span><span class="tv">${value}</span><span class="tn">${note}</span><span class="chev" aria-hidden="true">›</span>
     </button>`;
-  return `${header()}
-  <div class="home fade-in">
+  return screen(`
+  <div class="home">
     <div class="section">
       ${heroArt()}
       <h2>One word. Some liars. Maybe.</h2>
@@ -928,8 +1005,7 @@ function setupView() {
       ${tile("sound", "Sound", S.mute ? "Muted" : S.music ? "Music on" : "Music off", S.sfx ? "Effects on" : "Effects off")}
       <button class="tile" data-act="guide"><span class="tl">${icon("guide", 15)}Guide</span><span class="tv">How to</span><span class="tn">play · rules · tips</span><span class="chev" aria-hidden="true">›</span></button>
     </div>
-    <button class="btn big" data-act="start" ${canDeal() ? "" : "disabled"}>Deal the cards</button>
-  </div>`;
+  </div>`, `<button class="btn big" data-act="start" ${canDeal() ? "" : "disabled"}>Deal the cards</button>`);
 }
 
 function settingsView() {
@@ -972,16 +1048,19 @@ function settingsView() {
       <button class="twist" data-act="tw" data-v="${t}" aria-pressed="${!!S.twists[t]}">
         <span class="tick">${S.twists[t] ? "✓" : ""}</span><b>${icon(t, 16)}${TWISTS[t].name}</b><span class="d">${TWISTS[t].d}</span>
       </button>`).join("")}</div>` : ""}
+    ${S.twistOn ? `<button class="linkish" data-act="guide" data-v="g-twists">What does each twist do? ›</button>` : ""}
     <div class="switch-row">
       <div><b>House rule cards</b><p class="small muted">A silly rule for how clues are given each round.</p></div>
       <button class="switch" data-act="rules" aria-pressed="${S.rules}" aria-label="House rule cards"></button>
     </div>`;
   if (sub === "words") body = `
-    <div class="row" style="justify-content:space-between">
-      <p class="small muted">${S.cats.length} of ${Object.keys(BANK).length} categories · ${S.cats.reduce((n, c) => n + (BANK[c] ? BANK[c].length : 0), 0) + customPairs().length} words in play</p>
-      <div class="row" style="gap:6px"><button class="tog" data-act="catAll">All</button><button class="tog" data-act="catNone">None</button></div>
+    <div class="row" style="justify-content:space-between;flex-wrap:nowrap">
+      <p class="small muted" style="line-height:1.25">${S.cats.length}/${Object.keys(BANK).length} categories<br>${S.cats.reduce((n, c) => n + (BANK[c] ? BANK[c].length : 0), 0) + customPairs().length} words in play</p>
+      <div class="row" style="gap:6px;flex-wrap:nowrap"><button class="tog" data-act="catAll">All</button><button class="tog" data-act="catNone">None</button></div>
     </div>
-    <div class="cats">${Object.keys(BANK).map(c => `<button class="tog" data-act="cat" data-v="${esc(c)}" aria-pressed="${S.cats.includes(c)}">${icon(c, 15)} ${esc(c)} <span class="cnt">${BANK[c].length}</span></button>`).join("")}</div>
+    <button class="linkish" data-act="sub" data-v="custom">${icon("words", 15)} Your own words${customPairs().length ? ` (${customPairs().length})` : ""} ›</button>
+    <div class="cats">${Object.keys(BANK).map(c => `<button class="tog" data-act="cat" data-v="${esc(c)}" title="${esc(c)} · ${BANK[c].length} words" aria-pressed="${S.cats.includes(c)}">${icon(c, 14)}<span class="nm">${esc(c).replace("Superpowers", "Super&shy;powers")}</span><span class="cnt">${BANK[c].length}</span></button>`).join("")}</div>`;
+  if (sub === "custom") body = `
     <label for="custom"><b>Your own words</b></label>
     <p class="small muted">One per line: <code>word, decoy</code>. The decoy is used by Undercover and Split Room.</p>
     <textarea id="custom" placeholder="Grandma's lasagna, Grandpa's meatloaf">${esc(S.custom)}</textarea>`;
@@ -1009,13 +1088,9 @@ function settingsView() {
       : `<p class="muted">No scores yet. Points appear here after your first round.</p>`;
     body += `<button class="linkish" data-act="guide" data-v="g-score">How scoring works ›</button>`;
   }
-  return `${header()}
-  <div class="sub fade-in">
-    <button class="back" data-act="home">‹ Home</button>
-    <div class="section"><h2>${SUBS[sub].title}</h2><p class="muted small">${SUBS[sub].act}</p></div>
-    <div class="box">${body}</div>
-    <button class="btn big" data-act="home">Done</button>
-  </div>`;
+  return screen(`
+    <div class="section"><div class="titlebar">${SUBS[sub].back ? `<button class="back" data-act="sub" data-v="${SUBS[sub].back}" aria-label="Back to ${SUBS[SUBS[sub].back].title}">‹</button>` : `<button class="back" data-act="home" aria-label="Back to home">‹</button>`}<h2>${SUBS[sub].title}</h2></div><p class="muted small">${SUBS[sub].act}</p></div>
+    <div class="box ${sub}-box">${body}</div>`, SUBS[sub].back ? `<button class="btn big" data-act="sub" data-v="${SUBS[sub].back}">Done</button>` : `<button class="btn big" data-act="home">Done</button>`, "sub");
 }
 
 function roleCard(r) {
@@ -1048,19 +1123,16 @@ function passView() {
   const R = S.round, r = R.roles[R.order ? R.order[S.idx] : S.idx];
   const canSkip = S.idx === 0 && !R.locked && r.name === R.starter && r.word;
   const dots = R.roles.map((_, i) => `<i class="${i < S.idx ? "done" : i === S.idx ? "now" : ""}"></i>`).join("");
-  return `${header()}
-  <div class="pass fade-in">
+  return screen(`
     <div class="progress" aria-label="Player ${S.idx + 1} of ${R.roles.length}">${dots}</div>
     <p class="muted">Pass the phone to</p>
     <div class="who">${esc(r.name)}</div>
     <div class="card" id="card" role="button" tabindex="0" aria-label="Press and hold to see your card">
       <div class="face cover">${avatar(r.name, { size: 132, cls: "art" })}<p><b>Press and hold</b> to peek</p><p class="small muted">Only ${esc(r.name)} should look.</p></div>
       ${roleCard(r)}
-    </div>
-    ${canSkip ? `<p class="small muted" style="max-width:34ch">You give the first clue, so you're not an imposter. Don't like this word? Swap it before anyone else sees it.</p>
+    </div>`, `${canSkip ? `<p class="note">You give the first clue, so you're not an imposter. Don't like the word? Swap it now.</p>
     <button class="btn ghost" data-act="skip" ${S.peeked ? "" : "disabled"}>Skip this word${R.skips ? ` (skipped ${R.skips})` : ""}</button>` : ""}
-    <button class="btn big" data-act="next" ${S.peeked ? "" : "disabled"}>${S.idx + 1 < R.roles.length ? "Got it · pass it on" : "Everyone's seen it"}</button>
-  </div>`;
+    <button class="btn big" data-act="next" ${S.peeked ? "" : "disabled"}>${S.idx + 1 < R.roles.length ? "Got it · pass it on" : "Everyone's seen it"}</button>`, "pass");
 }
 
 let timerLeft = 0, timerId = null, timerRunning = false;
@@ -1072,43 +1144,42 @@ function discussView() {
     ? (S.count === 0 ? "Rumour says there's no imposter this time. Or is there?" : `There ${S.count === 1 ? "is 1 imposter" : "are " + S.count + " imposters"}${S.twistOn ? ", unless a twist says otherwise" : ""}.`)
     : S.mode === "maybe" ? `There ${S.count === 1 ? "should be 1 imposter" : "should be " + S.count + " imposters"}. There might be none.`
     : "Could be zero imposters. Could be everyone. Nobody knows.";
-  return `${header()}
-  <div class="section fade-in">
+  return screen(`
+  <div class="section">
     <h2>Clue time</h2>
     <div class="box" style="align-items:center;text-align:center;gap:6px;border-color:var(--gold)">
       <span class="round-tag">First clue from</span>
-      ${avatar(R.starter, { size: 76, cls: "bob" })}
+      ${avatar(R.starter, { size: 64, cls: "bob" })}
       <div class="who" style="font-family:var(--f-display);font-size:clamp(34px,10vw,54px);line-height:1.05;color:var(--gold);word-break:break-word">${esc(R.starter)}</div>
       <p class="small muted">Then go ${R.dir === "clockwise" ? "clockwise ↻" : "counter-clockwise ↺"}. One clue each, two laps.</p>
     </div>
     <p class="callout">${modeHint}</p>
   </div>
-  ${R.rule ? `<div class="rulecard"><h3>${icon("rule", 14)} House rule</h3><p>${esc(R.rule)}</p></div>` : ""}
-  ${S.timer ? `<div class="box" style="align-items:center">
+  ${R.rule ? `<div class="rulecard"><h3>${icon("rule", 14)} House rule</h3><p>${esc(R.rule)}</p></div>` : ""}`,
+  `${S.timer ? `<div class="tbar">
     <div class="timer ${timerLeft <= 15 ? "low" : ""}" id="timer" aria-live="off">${fmt(timerLeft)}</div>
-    <div class="row" style="justify-content:center">
-      <button class="btn" data-act="tgl">${timerRunning ? "Pause" : timerLeft === S.timer ? "Start timer" : "Resume"}</button>
-      <button class="btn ghost" data-act="treset">Reset</button>
-    </div>
+    <button class="btn" data-act="tgl">${timerRunning ? "Pause" : timerLeft === S.timer ? "Start" : "Resume"}</button>
+    <button class="btn ghost" data-act="treset">Reset</button>
   </div>` : ""}
   <button class="btn big" data-act="tovote">Time to vote</button>
-  <button class="btn ghost" data-act="repeek">Someone forgot their card</button>`;
+  <button class="linkish" data-act="repeek">Someone forgot their card?</button>`);
 }
 
 function voteView() {
   const R = S.round, sel = new Set(R.accused);
   const label = sel.size === 0 ? "There's no imposter" : sel.size === R.roles.length ? "Everyone's an imposter!" : `Accuse ${sel.size === 1 ? [...sel][0] : sel.size + " players"}`;
-  return `${header()}
-  <div class="section fade-in">
+  const many = R.roles.length > 6, avSize = R.roles.length > 12 || (many && innerHeight <= 760) ? 30 : R.roles.length > 9 ? 36 : many ? 44 : 52;
+  return screen(`
+  <div class="section">
     <h2>Who's lying?</h2>
-    <p class="muted">Agree as a group and tap everyone you accuse. Tap nobody if you think there's no imposter.</p>
+    <p class="muted small vote-intro">Agree as a group and tap everyone you accuse. Tap nobody if you think there's no imposter.</p>
   </div>
-  <div class="vote-grid">${R.roles.map(r => `<button data-act="acc" data-v="${esc(r.name)}" aria-pressed="${sel.has(r.name)}">${avatar(r.name, { size: 52 })}<span>${esc(r.name)}</span></button>`).join("")}</div>
-  <div class="row">
-    <button class="btn ghost grow" data-act="accAll">Select everyone</button>
-    <button class="btn ghost grow" data-act="accNone">Clear</button>
+  <div class="vote-grid${many ? " many" : ""}${R.roles.length > 12 ? " lots" : ""}">${R.roles.map(r => `<button data-act="acc" data-v="${esc(r.name)}" aria-pressed="${sel.has(r.name)}">${avatar(r.name, { size: avSize })}<span>${esc(r.name)}</span></button>`).join("")}</div>`,
+  `<div class="row">
+    <button class="btn ghost" data-act="accAll">Select everyone</button>
+    <button class="btn ghost" data-act="accNone">Clear</button>
   </div>
-  <button class="btn big ${sel.size ? "danger" : ""}" data-act="verdict">${esc(label)}</button>`;
+  <button class="btn big ${sel.size ? "danger" : ""}" data-act="verdict">${esc(label)}</button>`);
 }
 
 function resultView() {
@@ -1126,8 +1197,8 @@ function resultView() {
 
   const caught = imps.filter(r => accSet.has(r.name) && r.word === null);
   const roleLabel = r => r.role === "imp" ? ["Imposter", "imp"] : r.role === "jester" ? ["Jester", "special"] : r.role === "acc" ? ["Accomplice", "special"] : r.role === "det" ? ["Detective", "special"] : ["Crew", "crew"];
-  return `${header()}
-  <div class="section fade-in" style="gap:14px">
+  return screen(`
+  <div class="section" style="gap:14px">
     <div class="lineup">${(k && k < n ? imps : res.outcome === "jest" ? R.roles.filter(r => r.role === "jester") : R.roles).map(r => {
       const caughtNow = r.role === "imp" && accSet.has(r.name);
       const art = r.role === "imp" ? avatar(r.name, { disguise: true, size: k && k < n ? 72 : 46, cls: caughtNow && r.word === null ? "unmask" : "" }) : roleArt(r, res.outcome === "jest" ? 72 : 46);
@@ -1150,9 +1221,8 @@ function resultView() {
         ${caught.includes(r) ? `<button class="steal" data-act="steal" data-v="${esc(r.name)}" aria-pressed="${R.stolen.includes(r.name)}">${R.stolen.includes(r.name) ? "Guessed the word · +1" : "Last chance: guessed the word?"}</button>` : ""}
       </div><div style="text-align:right"><span class="tag ${c}">${lab}</span><div class="pts" style="font-family:var(--f-mono);color:${d ? "var(--gold)" : "var(--muted)"};margin-top:4px">${d ? "+" + d : "0"}</div></div></div>`;
     }).join("")}</div>
-  </div>
-  <button class="btn big" data-act="again">Next round</button>
-  <button class="btn ghost" data-act="tosetup">Home · settings &amp; scores</button>`;
+  </div>`, `<button class="btn big" data-act="again">Next round</button>
+  <button class="btn ghost" data-act="tosetup">Home · settings &amp; scores</button>`);
 }
 
 
@@ -1182,27 +1252,24 @@ function guideBackLabel() {
 function guideView() {
   const id = S.gtopic;
   const i = GUIDE_TOC.findIndex(t => t[0] === id);
-  if (i < 0) return `${header()}
-  <div class="sub fade-in">
+  if (i < 0) return screen(`
     <button class="back" data-act="unguide">‹ ${guideBackLabel()}</button>
     <div class="section"><h2>How to play</h2>
       <p class="muted small">A party game for 3 to 20 players on one phone. Everyone gets a secret word except the imposters, who bluff. You never know for sure how many imposters there are. There might be none.</p></div>
     <nav class="gmenu" aria-label="Guide topics">${GUIDE_TOC.map(([gid, t, d], k) => `
-      <button data-act="topic" data-v="${gid}"><span class="gnum">${k + 1}</span><span class="gt"><b>${t}</b><span>${d}</span></span><span class="chev" aria-hidden="true">›</span></button>`).join("")}</nav>
-  </div>`;
+      <button data-act="topic" data-v="${gid}"><span class="gnum">${k + 1}</span><span class="gt"><b>${t}</b><span>${d}</span></span><span class="chev" aria-hidden="true">›</span></button>`).join("")}</nav>`,
+  `<button class="btn big" data-act="unguide">${guideBackLabel()}</button>`, "sub");
   const prev = GUIDE_TOC[i - 1], next = GUIDE_TOC[i + 1];
-  return `${header()}
-  <div class="sub fade-in">
+  return screen(`
     <div class="row" style="justify-content:space-between">
       <button class="back" data-act="topic" data-v="">‹ All topics</button>
       <span class="round-tag">${i + 1} / ${GUIDE_TOC.length}</span>
     </div>
-    <section class="box gsec">${guideSection(id)}</section>
+    <section class="box gsec">${guideSection(id)}</section>`, `
     <div class="pager">
       ${prev ? `<button class="btn ghost" data-act="topic" data-v="${prev[0]}">‹ ${prev[1]}</button>` : `<span></span>`}
       ${next ? `<button class="btn" data-act="topic" data-v="${next[0]}">${next[1]} ›</button>` : `<button class="btn" data-act="unguide">${guideBackLabel()}</button>`}
-    </div>
-  </div>`;
+    </div>`, "sub");
 }
 function guideAllHTML() {
   const back = S.back && S.back !== "guide" ? S.back : "setup";
@@ -1403,9 +1470,12 @@ function guideAllHTML() {
 let resetArmed = false;
 function render() {
   const views = { guide: guideView, settings: settingsView, setup: setupView, pass: passView, discuss: discussView, vote: voteView, result: resultView };
-  app.innerHTML = (views[S.screen] || setupView)();
-  if (S.screen === "pass") bindCard();
   const viewKey = [S.screen, S.sub, S.gtopic, S.screen === "pass" ? S.idx : ""].join("|");
+  const old = app.querySelector(".scroll"), keep = viewKey === AU.view && old ? old.scrollTop : 0;
+  app.innerHTML = (views[S.screen] || setupView)();
+  const sc = app.querySelector(".scroll");
+  if (sc) { if (viewKey === AU.view) sc.classList.remove("fade-in"); sc.scrollTop = keep; }
+  if (S.screen === "pass") bindCard();
   if (viewKey !== AU.view) { if (AU.view !== undefined) musicTransition({ pass: "hush", discuss: "tense", vote: "suspense" }[S.screen] || "lobby"); else AU.mood = { pass: "hush", discuss: "tense", vote: "suspense" }[S.screen] || "lobby"; AU.view = viewKey; }
   save();
 }
@@ -1481,23 +1551,23 @@ app.addEventListener("click", e => {
     case "reset": if (resetArmed) { S.scores = {}; S.roundNo = 0; resetArmed = false; } else resetArmed = true; break;
     case "start": case "again":
       if (act === "again") applyScores();
-      newRound(); window.scrollTo(0, 0); break;
+      newRound();  break;
     case "skip": if (S.idx === 0 && !S.round.locked) { skipWord(); sfx("skip"); } break;
     case "next":
       S.round.locked = true;
       S.peeked = false;
       if (S.idx + 1 < S.round.roles.length) S.idx++;
       else { S.screen = "discuss"; stopTimer(); timerLeft = S.timer; }
-      window.scrollTo(0, 0); break;
+       break;
     case "tgl": if (timerRunning) stopTimer(); else { if (timerLeft === 0) timerLeft = S.timer; startTimer(); } break;
     case "treset": stopTimer(); timerLeft = S.timer; break;
     case "repeek": stopTimer(); S.idx = 0; S.peeked = false; S.screen = "pass"; break;
-    case "tovote": stopTimer(); S.screen = "vote"; window.scrollTo(0, 0); break;
+    case "tovote": stopTimer(); S.screen = "vote";  break;
     case "acc": { const a = S.round.accused; const i = a.indexOf(v); if (i >= 0) { a.splice(i, 1); sfx("unaccuse"); } else { a.push(v); sfx("accuse"); } break; }
     case "accAll": S.round.accused = S.round.roles.map(r => r.name); break;
     case "accNone": S.round.accused = []; break;
     case "verdict": {
-      S.screen = "result"; window.scrollTo(0, 0);
+      S.screen = "result"; 
       const out = computeScores(S.round).outcome;
       const unmasked = S.round.roles.some(r => r.role === "imp" && r.word === null && S.round.accused.includes(r.name)) && S.round.roles.some(r => r.role !== "imp");
       sfx("drumroll");
@@ -1508,13 +1578,13 @@ app.addEventListener("click", e => {
       break;
     }
     case "steal": { const s = S.round.stolen; const i = s.indexOf(v); if (i >= 0) s.splice(i, 1); else s.push(v); break; }
-    case "guide": if (S.screen !== "guide") S.back = S.screen; S.gtopic = v || null; S.screen = "guide"; window.scrollTo(0, 0); break;
-    case "topic": S.gtopic = v || null; window.scrollTo(0, 0); break;
-    case "unguide": S.screen = S.back && S.back !== "guide" ? S.back : "setup"; if (S.screen === "pass") S.peeked = false; window.scrollTo(0, 0); break;
-    case "sub": S.sub = v; S.screen = "settings"; window.scrollTo(0, 0); break;
-    case "home": S.screen = "setup"; window.scrollTo(0, 0); break;
+    case "guide": if (S.screen !== "guide") S.back = S.screen; S.gtopic = v || null; S.screen = "guide";  break;
+    case "topic": S.gtopic = v || null;  break;
+    case "unguide": S.screen = S.back && S.back !== "guide" ? S.back : "setup"; if (S.screen === "pass") S.peeked = false;  break;
+    case "sub": S.sub = v; S.screen = "settings";  break;
+    case "home": S.screen = "setup";  break;
     case "up": { const i = +b.dataset.i; if (i > 0) [S.players[i - 1], S.players[i]] = [S.players[i], S.players[i - 1]]; break; }
-    case "tosetup": applyScores(); S.screen = "setup"; window.scrollTo(0, 0); break;
+    case "tosetup": applyScores(); S.screen = "setup";  break;
   }
   render();
 });
