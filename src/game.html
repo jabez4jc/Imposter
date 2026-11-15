@@ -219,6 +219,11 @@ textarea { min-height: 84px; resize: vertical; font-family: var(--f-mono); font-
 .twist b { display: inline-flex; align-items: center; gap: 6px; }
 .twist b .ic { color: var(--sky); }
 .iconbtn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); color: var(--paper); display: inline-grid; place-items: center; flex: none; padding: 0; }
+.iconbtn.quit { color: var(--coral); border-color: var(--coral); }
+.sheet-bg { position: fixed; inset: 0; z-index: 40; background: rgba(10, 4, 24, .72); display: flex; align-items: flex-end; justify-content: center; animation: fin .18s ease both; }
+.sheet { width: 100%; max-width: 560px; background: var(--panel); border: 1px solid var(--line); border-bottom: 0; border-radius: 20px 20px 0 0; display: flex; flex-direction: column; gap: 10px;
+  padding: 20px max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); box-shadow: 0 -12px 30px rgba(0,0,0,.4); }
+.sheet h2 { color: var(--coral); }
 .iconbtn[aria-pressed=true][data-act=mute] { color: var(--coral); border-color: var(--coral); }
 .slider { display: grid; grid-template-columns: auto 1fr 3.5em; gap: 10px; align-items: center; font-size: 14px; color: var(--muted); }
 .slider input { width: 100%; accent-color: var(--gold); min-width: 0; }
@@ -548,6 +553,7 @@ const ICONS = {
   sound: `<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>`,
   soundOff: `<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9.5l5 5M22 9.5l-5 5"/>`,
   music: `<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>`,
+  close: `<path d="M6 6l12 12M18 6L6 18"/>`,
   help: `<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.5v.4"/><path d="M12 16.8v.2"/>`
 };
 function icon(name, size = 18) {
@@ -956,12 +962,23 @@ document.addEventListener("visibilitychange", () => { if (!AU.ctx) return; if (d
 /* ---------- Screens ---------- */
 /* Every screen = header + scrolling content + a dock of buttons that never scrolls away. */
 function screen(body, dock, cls = "") {
-  return `${header()}<main class="scroll fade-in ${cls}">${body}</main>${dock ? `<div class="dock">${dock}</div>` : ""}`;
+  return `${header()}<main class="scroll fade-in ${cls}">${body}</main>${dock ? `<div class="dock">${dock}</div>` : ""}${S.quitAsk ? quitSheet() : ""}`;
+}
+function quitSheet() {
+  return `<div class="sheet-bg" data-act="quitNo">
+    <div class="sheet" data-act="noop" role="alertdialog" aria-modal="true" aria-labelledby="quitT" aria-describedby="quitD">
+      <h2 id="quitT">End this round?</h2>
+      <p id="quitD" class="muted small">Nobody scores and the word is thrown away. Players, settings and scores so far are kept.</p>
+      <button class="btn big danger" data-act="quitYes">End round</button>
+      <button class="btn ghost" data-act="quitNo" autofocus>Keep playing</button>
+    </div>
+  </div>`;
 }
 function header() {
   const r = S.round && ["pass", "discuss", "vote", "result"].includes(S.screen) ? `Round ${S.round.no}` : "";
   const btn = `<button class="iconbtn" data-act="mute" aria-pressed="${S.mute}" aria-label="${S.mute ? "Turn sound on" : "Mute all sound"}" title="${S.mute ? "Sound off" : "Sound on"}">${icon(S.mute ? "soundOff" : "sound", 18)}</button>`
-    + (S.screen === "guide" ? "" : `<button class="iconbtn" data-act="guide" aria-label="Open the user guide" title="How to play">${icon("help", 18)}</button>`);
+    + (S.screen === "guide" ? "" : `<button class="iconbtn" data-act="guide" aria-label="Open the user guide" title="How to play">${icon("help", 18)}</button>`)
+    + (S.round && ["pass", "discuss", "vote"].includes(S.screen) ? `<button class="iconbtn quit" data-act="quit" aria-label="End this round" title="End round">${icon("close", 18)}</button>` : "");
   return `<header class="top"><h1 class="logo">${icon("mask", 24)}<span>IMPOSTER<span>.</span>PARTY</span></h1><div class="hdr-right">${S.screen === "guide" ? "" : r ? `<span class="round-tag">${r}</span>` : ""}${btn}</div></header>`;
 }
 
@@ -1448,8 +1465,10 @@ function guideAllHTML() {
       <h2>FAQ &amp; troubleshooting</h2>
       <h4>Someone forgot their word.</h4>
       <p>On the clue screen, tap <b>Someone forgot their card</b>. The phone goes back to the start of the pass so each player can peek again. The word can no longer be skipped.</p>
+      <h4>We need to stop in the middle of a round.</h4>
+      <p>Tap the red <b>×</b> at the top right during the pass, clue or vote screens, then <b>End round</b>. Nobody scores, the word is thrown away, and you're back on the home screen with your players and scores kept.</p>
       <h4>Someone saw another player's card.</h4>
-      <p>Finish the vote, then tap <b>Next round</b> to deal a fresh word.</p>
+      <p>Tap the red <b>×</b> at the top and <b>End round</b>, then deal again for a fresh word. No points are given for the abandoned round.</p>
       <h4>The Deal button is greyed out.</h4>
       <p>You need at least 3 players and at least one category (or a custom word). A tile with a red edge shows what's missing.</p>
       <h4>I can't add a player.</h4>
@@ -1528,12 +1547,16 @@ app.addEventListener("change", e => { if (e.target.id === "custom") render(); if
 app.addEventListener("click", e => {
   const b = e.target.closest("[data-act]"); if (!b || b.disabled) return;
   const act = b.dataset.act, v = b.dataset.v;
+  if (act === "noop") return;
   if (act !== "reset") resetArmed = false;
   const ACT_SFX = { catAll: "toggle", catNone: "toggle", start: "deal", again: "deal", next: "pass", accAll: "accuse", accNone: "unaccuse", steal: "steal", guide: "page", topic: "page", unguide: "page",
-    sub: "tap", home: "tap", tosetup: "tap", mode: "toggle", hint: "toggle", twistOn: "toggle", tw: "toggle", rules: "toggle", cat: "toggle", timer: "toggle",
+    sub: "tap", home: "tap", quit: "tap", quitNo: "tap", quitYes: "page", tosetup: "tap", mode: "toggle", hint: "toggle", twistOn: "toggle", tw: "toggle", rules: "toggle", cat: "toggle", timer: "toggle",
     cnt: "tap", rm: "tap", up: "tap", tgl: "tap", treset: "tap", repeek: "tap", tovote: "accuse", reset: "tap", music: "toggle", sfx: "toggle" };
   if (ACT_SFX[act]) sfx(ACT_SFX[act]);
   switch (act) {
+    case "quit": S.quitAsk = true; break;
+    case "quitNo": S.quitAsk = false; break;
+    case "quitYes": stopTimer(); S.quitAsk = false; S.round = null; S.peeked = false; S.idx = 0; S.roundNo = Math.max(0, S.roundNo - 1); S.screen = "setup"; break;
     case "mute": S.mute = !S.mute; if (!S.mute) { unlockAudio(); applyVolumes(); musicStart(); sfx("toggle"); } else applyVolumes(); break;
     case "music": S.music = !S.music; applyVolumes(); if (S.music) musicStart(); else musicStop(); break;
     case "sfx": S.sfx = !S.sfx; applyVolumes(); if (S.sfx) sfx("toggle"); break;
@@ -1589,9 +1612,12 @@ app.addEventListener("click", e => {
   render();
 });
 
+document.addEventListener("keydown", e => { if (e.key === "Escape" && S.quitAsk) { S.quitAsk = false; render(); } });
+
 /* ---------- Boot ---------- */
 function start(data) {
   load(data && data.S);
+  S.quitAsk = false;
   if (S.screen === "discuss") timerLeft = S.timer;
   if (!S.round && !["setup", "settings", "guide"].includes(S.screen)) S.screen = "setup";
   render();
